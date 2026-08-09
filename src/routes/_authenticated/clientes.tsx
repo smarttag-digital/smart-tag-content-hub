@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { CLIENT_STATUS, formatDate, labelOf } from "@/lib/domain";
+import { CLIENT_STATUS, formatDate, labelOf, randomSuffix, slugify } from "@/lib/domain";
 
 export const Route = createFileRoute("/_authenticated/clientes")({
   head: () => ({
@@ -45,7 +45,6 @@ type ClientForm = {
   contact_name: string;
   email: string;
   phone: string;
-  segment: string;
   status: string;
   notes: string;
 };
@@ -55,7 +54,6 @@ const EMPTY: ClientForm = {
   contact_name: "",
   email: "",
   phone: "",
-  segment: "",
   status: "ativo",
   notes: "",
 };
@@ -85,7 +83,6 @@ function ClientsPage() {
         contact_name: values.contact_name || null,
         email: values.email || null,
         phone: values.phone || null,
-        segment: values.segment || null,
         status: values.status,
         notes: values.notes || null,
       };
@@ -93,7 +90,9 @@ function ClientsPage() {
         const { error } = await supabase.from("clients").update(payload).eq("id", values.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("clients").insert(payload);
+        const { error } = await supabase
+          .from("clients")
+          .insert({ ...payload, slug: `${slugify(values.company_name)}-${randomSuffix()}` });
         if (error) throw error;
       }
     },
@@ -119,7 +118,7 @@ function ClientsPage() {
   });
 
   const filtered = (data ?? []).filter((client) =>
-    `${client.company_name} ${client.contact_name ?? ""} ${client.segment ?? ""}`
+    `${client.company_name} ${client.contact_name ?? ""} ${client.email ?? ""}`
       .toLowerCase()
       .includes(search.toLowerCase()),
   );
@@ -164,14 +163,13 @@ function ClientsPage() {
                     {client.company_name}
                   </h2>
                   <p className="truncate text-sm text-muted-foreground">
-                    {client.segment || "Segmento não informado"}
+                    {client.email || "E-mail não informado"}
                   </p>
                 </div>
                 <StatusBadge value={client.status} label={labelOf(CLIENT_STATUS, client.status)} />
               </div>
               <dl className="space-y-1 text-sm text-muted-foreground">
                 <div>{client.contact_name || "Contato não informado"}</div>
-                <div>{client.email || "—"}</div>
                 <div>{client.phone || "—"}</div>
               </dl>
               <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
@@ -191,7 +189,6 @@ function ClientsPage() {
                         contact_name: client.contact_name ?? "",
                         email: client.email ?? "",
                         phone: client.phone ?? "",
-                        segment: client.segment ?? "",
                         status: client.status,
                         notes: client.notes ?? "",
                       });
@@ -260,14 +257,6 @@ function ClientsPage() {
                   id="contact"
                   value={form.contact_name}
                   onChange={(event) => setForm({ ...form, contact_name: event.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="segment">Segmento</Label>
-                <Input
-                  id="segment"
-                  value={form.segment}
-                  onChange={(event) => setForm({ ...form, segment: event.target.value })}
                 />
               </div>
               <div className="space-y-2">
