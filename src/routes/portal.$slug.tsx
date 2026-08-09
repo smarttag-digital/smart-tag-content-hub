@@ -1,0 +1,247 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { Check, Loader2, Film } from "lucide-react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { CATEGORIES, formatDuration, formatPeriod, labelOf } from "@/lib/domain";
+import { confirmSelection, getPortal, saveVideoNote, toggleVideoSelection } from "@/lib/portal.functions";
+
+export const Route = createFileRoute("/portal/$slug")({
+  head: () => ({
+    meta: [
+      { title: "Portal de seleção | SMAR TAG" },
+      { name: "description", content: "Assista aos vídeos da sua campanha e escolha os conteúdos que deseja receber." },
+      { property: "og:title", content: "Portal de seleção | SMAR TAG" },
+      { property: "og:description", content: "Assista aos vídeos da sua campanha e escolha os conteúdos que deseja receber." },
+    ],
+  }),
+  ssr: false,
+  component: PortalPage,
+});
+
+function PortalPage() {
+  const { slug } = Route.useParams();
+  const queryClient = useQueryClient();
+  const load = useServerFn(getPortal);
+  const toggle = useServerFn(toggleVideoSelection);
+  const note = useServerFn(saveVideoNote);
+  const confirm = useServerFn(confirmSelection);
+  const [filter, setFilter] = useState("todas");
+  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["portal", slug],
+    queryFn: () => load({ data: { slug } }),
+    retry: false,
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["portal", slug] });
+
+  const toggleMutation = useMutation({
+    mutationFn: (input: { videoId: string; selected: boolean }) =>
+      toggle({ data: { slug, ...input } }),
+    onSuccess: invalidate,
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const noteMutation = useMutation({
+    mutationFn: (input: { videoId: string; note: string }) => note({ data: { slug, ...input } }),
+    onSuccess: () => {
+      toast.success("Observação enviada");
+      invalidate();
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const confirmMutation = useMutation({
+    mutationFn: () => confirm({ data: { slug } }),
+    onSuccess: () => {
+      toast.success("Seleção confirmada! Nossa equipe já foi avisada.");
+      invalidate();
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  if (isLoading) {
+    return (
+      <main className="aurora flex min-h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-brand-violet" />
+      </main>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <main className="aurora flex min-h-screen items-center justify-center px-4 text-center">
+        <div className="surface-panel max-w-md p-8">
+          <h1 className="font-display text-xl font-semibold">Portal indisponível</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : "Verifique o link recebido pela equipe."}
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  const videos = data.videos.filter(
+    (video) => filter === "todas" || video.category === filter,
+  );
+  const selectedCount = data.videos.filter((video) => video.selected).length;
+
+  return (
+    <main className="min-h-screen bg-background pb-32">
+      <header className="aurora border-b border-border px-4 py-12 lg:px-10">
+        <div className="mx-auto max-w-6xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-violet">
+            {data.agency.agency_name}
+          </p>
+          <h1 className="mt-3 font-display text-3xl font-bold lg:text-4xl">{data.campaign.name}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {data.client.company_name} · {formatPeriod(data.campaign.start_date, data.campaign.end_date)}
+          </p>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            {data.agency.portal_message}
+          </p>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-6xl px-4 py-8 lg:px-10">
+        {data.locked && (
+          <div className="surface-panel mb-6 flex items-center gap-3 p-4 text-sm">
+            <Check className="h-4 w-4 text-emerald-400" />
+            Seleção confirmada. Nossa equipe está preparando os conteúdos escolhidos.
+          </div>
+        )}
+
+        <div className="mb-6 flex flex-wrap gap-2">
+          {[{ value: "todas", label: "Todas" }, ...CATEGORIES].map((category) => (
+            <button
+              key={category.value}
+              onClick={() => setFilter(category.value)}
+              className={
+                filter === category.value
+                  ? "gradient-brand rounded-full px-4 py-1.5 text-sm font-medium text-primary-foreground"
+                  : "rounded-full border border-border px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              }
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
+
+        {videos.length ? (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {videos.map((video) => (
+              <article
+                key={video.id}
+                className={
+                  video.selected
+                    ? "surface-panel overflow-hidden ring-2 ring-brand-violet"
+                    : "surface-panel overflow-hidden"
+                }
+              >
+                <div className="relative aspect-video bg-surface-2">
+                  {video.videoUrl ? (
+                    <video
+                      src={video.videoUrl}
+                      poster={video.thumbnailUrl ?? undefined}
+                      controls
+                      preload="none"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-muted-foreground">
+                      <Film className="h-8 w-8" />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-3 p-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h2 className="truncate font-display font-semibold">{video.title}</h2>
+                      <p className="text-xs text-muted-foreground">
+                        {labelOf(CATEGORIES, video.category)} ·{" "}
+                        {formatDuration(video.duration_seconds)}
+                      </p>
+                    </div>
+                  </div>
+                  {video.description && (
+                    <p className="text-sm text-muted-foreground">{video.description}</p>
+                  )}
+
+                  {!data.locked && (
+                    <>
+                      <Button
+                        variant={video.selected ? "secondary" : "default"}
+                        className={video.selected ? "w-full" : "gradient-brand w-full"}
+                        onClick={() =>
+                          toggleMutation.mutate({ videoId: video.id, selected: !video.selected })
+                        }
+                      >
+                        {video.selected ? "Remover seleção" : "Selecionar vídeo"}
+                      </Button>
+                      {video.selected && (
+                        <div className="space-y-2">
+                          <Textarea
+                            rows={2}
+                            placeholder="Alguma observação sobre este vídeo?"
+                            value={notes[video.id] ?? video.note ?? ""}
+                            onChange={(event) =>
+                              setNotes({ ...notes, [video.id]: event.target.value })
+                            }
+                          />
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              noteMutation.mutate({
+                                videoId: video.id,
+                                note: notes[video.id] ?? video.note ?? "",
+                              })
+                            }
+                          >
+                            Enviar observação
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {data.locked && video.selected && (
+                    <p className="text-sm text-emerald-300">Selecionado</p>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="py-16 text-center text-sm text-muted-foreground">
+            Nenhum vídeo nesta categoria.
+          </p>
+        )}
+      </div>
+
+      {!data.locked && (
+        <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/90 px-4 py-4 backdrop-blur-xl lg:px-10">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{selectedCount}</span> vídeo(s)
+              selecionado(s)
+            </p>
+            <Button
+              className="gradient-brand"
+              disabled={!selectedCount || confirmMutation.isPending}
+              onClick={() => confirmMutation.mutate()}
+            >
+              {confirmMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Confirmar seleção
+            </Button>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
