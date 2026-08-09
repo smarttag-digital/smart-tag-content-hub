@@ -260,7 +260,10 @@ function CampaignsPage() {
             className="space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
-              if (!form.client_id) return toast.error("Selecione um cliente");
+              if (!form.client_id) {
+                toast.error("Selecione um cliente");
+                return;
+              }
               save.mutate(form);
             }}
           >
