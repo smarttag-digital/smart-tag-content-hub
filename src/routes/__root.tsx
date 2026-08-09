@@ -76,20 +76,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SMAR TAG Content Hub" },
+      { title: "SMART TAG Content Hub" },
       {
         name: "description",
         content:
-          "Portal de seleção e aprovação de conteúdos em vídeo da agência SMAR TAG para seus clientes.",
+          "Portal de seleção e aprovação de conteúdos em vídeo da agência SMART TAG para seus clientes.",
       },
       { name: "author", content: "SMAR TAG" },
-      { property: "og:title", content: "SMAR TAG Content Hub" },
+      { property: "og:title", content: "SMART TAG Content Hub" },
       {
         property: "og:description",
-        content: "Portal de seleção e aprovação de conteúdos em vídeo da agência SMAR TAG.",
+        content: "Portal de seleção e aprovação de conteúdos em vídeo da agência SMART TAG para seus clientes.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "SMART TAG Content Hub" },
+      { name: "twitter:description", content: "Portal de seleção e aprovação de conteúdos em vídeo da agência SMART TAG para seus clientes." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2b58cb83a11e39450073a592a1bdfe25/id-preview-35c3a0d6--75bc4187-7f48-445a-8275-d8efefa31e6f.lovable.app-1786302159211.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2b58cb83a11e39450073a592a1bdfe25/id-preview-35c3a0d6--75bc4187-7f48-445a-8275-d8efefa31e6f.lovable.app-1786302159211.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
