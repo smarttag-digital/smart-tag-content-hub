@@ -16,6 +16,7 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as AuthenticatedCampanhasRouteImport } from './routes/_authenticated/campanhas'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedSelecoesRouteImport } from './routes/_authenticated/selecoes'
 import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
 import { Route as AuthenticatedCampanhasIdRouteImport } from './routes/_authenticated/campanhas_.$id'
 
@@ -53,6 +54,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSelecoesRoute = AuthenticatedSelecoesRouteImport.update({
+  id: '/selecoes',
+  path: '/selecoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedVideosRoute = AuthenticatedVideosRouteImport.update({
   id: '/videos',
   path: '/videos',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/campanhas': typeof AuthenticatedCampanhasRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/selecoes': typeof AuthenticatedSelecoesRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/campanhas/$id': typeof AuthenticatedCampanhasIdRoute
 }
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/campanhas': typeof AuthenticatedCampanhasRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/selecoes': typeof AuthenticatedSelecoesRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/campanhas/$id': typeof AuthenticatedCampanhasIdRoute
 }
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/_authenticated/campanhas': typeof AuthenticatedCampanhasRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/selecoes': typeof AuthenticatedSelecoesRoute
   '/_authenticated/videos': typeof AuthenticatedVideosRoute
   '/_authenticated/campanhas_/$id': typeof AuthenticatedCampanhasIdRoute
 }
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/campanhas'
     | '/clientes'
     | '/dashboard'
+    | '/selecoes'
     | '/videos'
     | '/campanhas/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/campanhas'
     | '/clientes'
     | '/dashboard'
+    | '/selecoes'
     | '/videos'
     | '/campanhas/$id'
   id:
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/_authenticated/campanhas'
     | '/_authenticated/clientes'
     | '/_authenticated/dashboard'
+    | '/_authenticated/selecoes'
     | '/_authenticated/videos'
     | '/_authenticated/campanhas_/$id'
   fileRoutesById: FileRoutesById
@@ -189,6 +201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/selecoes': {
+      id: '/_authenticated/selecoes'
+      path: '/selecoes'
+      fullPath: '/selecoes'
+      preLoaderRoute: typeof AuthenticatedSelecoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/videos': {
       id: '/_authenticated/videos'
       path: '/videos'
@@ -210,6 +229,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCampanhasRoute: typeof AuthenticatedCampanhasRoute
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedSelecoesRoute: typeof AuthenticatedSelecoesRoute
   AuthenticatedVideosRoute: typeof AuthenticatedVideosRoute
   AuthenticatedCampanhasIdRoute: typeof AuthenticatedCampanhasIdRoute
 }
@@ -218,6 +238,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCampanhasRoute: AuthenticatedCampanhasRoute,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedSelecoesRoute: AuthenticatedSelecoesRoute,
   AuthenticatedVideosRoute: AuthenticatedVideosRoute,
   AuthenticatedCampanhasIdRoute: AuthenticatedCampanhasIdRoute,
 }
