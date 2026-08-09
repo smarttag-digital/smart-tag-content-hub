@@ -60,9 +60,9 @@ function SettingsPage() {
       const { error } = await supabase.from("agency_settings").upsert({
         id: 1,
         agency_name: form.agency_name,
-        portal_message: form.portal_message || undefined,
-        email: form.email || undefined,
-        phone: form.phone || undefined,
+        portal_message: form.portal_message,
+        email: form.email || null,
+        phone: form.phone || null,
       });
       if (error) throw error;
     },

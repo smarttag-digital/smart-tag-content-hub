@@ -19,6 +19,7 @@ import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authen
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedSelecoesRouteImport } from './routes/_authenticated/selecoes'
 import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
+import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
 import { Route as AuthenticatedCampanhasIdRouteImport } from './routes/_authenticated/campanhas_.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -71,6 +72,11 @@ const AuthenticatedVideosRoute = AuthenticatedVideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const PortalSlugRoute = PortalSlugRouteImport.update({
+  id: '/portal/$slug',
+  path: '/portal/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedCampanhasIdRoute =
   AuthenticatedCampanhasIdRouteImport.update({
     id: '/campanhas_/$id',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/selecoes': typeof AuthenticatedSelecoesRoute
   '/videos': typeof AuthenticatedVideosRoute
+  '/portal/$slug': typeof PortalSlugRoute
   '/campanhas/$id': typeof AuthenticatedCampanhasIdRoute
 }
 export interface FileRoutesByTo {
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/selecoes': typeof AuthenticatedSelecoesRoute
   '/videos': typeof AuthenticatedVideosRoute
+  '/portal/$slug': typeof PortalSlugRoute
   '/campanhas/$id': typeof AuthenticatedCampanhasIdRoute
 }
 export interface FileRoutesById {
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/selecoes': typeof AuthenticatedSelecoesRoute
   '/_authenticated/videos': typeof AuthenticatedVideosRoute
+  '/portal/$slug': typeof PortalSlugRoute
   '/_authenticated/campanhas_/$id': typeof AuthenticatedCampanhasIdRoute
 }
 export interface FileRouteTypes {
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/selecoes'
     | '/videos'
+    | '/portal/$slug'
     | '/campanhas/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/selecoes'
     | '/videos'
+    | '/portal/$slug'
     | '/campanhas/$id'
   id:
     | '__root__'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/selecoes'
     | '/_authenticated/videos'
+    | '/portal/$slug'
     | '/_authenticated/campanhas_/$id'
   fileRoutesById: FileRoutesById
 }
@@ -161,6 +173,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  PortalSlugRoute: typeof PortalSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -235,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVideosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/portal/$slug': {
+      id: '/portal/$slug'
+      path: '/portal/$slug'
+      fullPath: '/portal/$slug'
+      preLoaderRoute: typeof PortalSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/campanhas_/$id': {
       id: '/_authenticated/campanhas_/$id'
       path: '/campanhas/$id'
@@ -273,6 +293,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
+  PortalSlugRoute: PortalSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
