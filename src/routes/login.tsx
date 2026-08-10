@@ -7,6 +7,7 @@ import { BrandMark } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 
 const ALLOWED_EMAIL = "smart.tag14@gmail.com";
@@ -85,11 +86,16 @@ function LoginPage() {
   async function handleGoogle() {
     setGoogleLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: window.location.origin },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
       });
-      if (error) throw error;
+      if (result.error) throw result.error;
+      const { data } = await supabase.auth.getUser();
+      if (data.user?.email?.toLowerCase() !== ALLOWED_EMAIL) {
+        await supabase.auth.signOut();
+        throw new Error("Esta conta Google não tem permissão de acesso ao painel.");
+      }
+      navigate({ to: "/dashboard" });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Falha ao entrar com Google");
       setGoogleLoading(false);
