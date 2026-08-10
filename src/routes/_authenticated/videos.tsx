@@ -153,8 +153,14 @@ function VideosPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!form.campaignId) return toast.error("Selecione a campanha");
-    if (!videoFile) return toast.error("Selecione o arquivo de vídeo");
+    if (!form.campaignId) {
+      toast.error("Selecione a campanha");
+      return;
+    }
+    if (!videoFile) {
+      toast.error("Selecione o arquivo de vídeo");
+      return;
+    }
 
     setUploading(true);
     setProgress(8);
