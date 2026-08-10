@@ -2,10 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Loader2, Film } from "lucide-react";
+import { Check, Loader2, Film, Play, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { CATEGORIES, formatDuration, formatPeriod, labelOf } from "@/lib/domain";
 import { confirmSelection, getPortal, saveVideoNote, toggleVideoSelection } from "@/lib/portal.functions";
@@ -32,6 +33,7 @@ function PortalPage() {
   const confirm = useServerFn(confirmSelection);
   const [filter, setFilter] = useState("todas");
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [playing, setPlaying] = useState<{ id: string; title: string; url: string } | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["portal", slug],
@@ -144,21 +146,37 @@ function PortalPage() {
                     : "surface-panel overflow-hidden"
                 }
               >
-                <div className="relative aspect-video bg-surface-2">
-                  {video.videoUrl ? (
-                    <video
-                      src={video.videoUrl}
-                      poster={video.thumbnailUrl ?? undefined}
-                      controls
-                      preload="none"
-                      className="h-full w-full object-cover"
+                <button
+                  type="button"
+                  className="group relative block aspect-video w-full bg-surface-2"
+                  disabled={!video.videoUrl}
+                  onClick={() =>
+                    video.videoUrl &&
+                    setPlaying({ id: video.id, title: video.title, url: video.videoUrl })
+                  }
+                  aria-label={`Assistir ${video.title}`}
+                >
+                  {video.thumbnailUrl ? (
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={`Miniatura do vídeo ${video.title}`}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-muted-foreground">
                       <Film className="h-8 w-8" />
                     </div>
                   )}
-                </div>
+                  <span className="absolute inset-0 flex items-center justify-center bg-background/40 opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="gradient-brand flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground shadow-glow">
+                      <Play className="h-6 w-6" />
+                    </span>
+                  </span>
+                  <span className="absolute bottom-2 right-2 rounded bg-background/85 px-1.5 py-0.5 text-xs">
+                    {formatDuration(video.duration_seconds)}
+                  </span>
+                </button>
                 <div className="space-y-3 p-5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -242,6 +260,30 @@ function PortalPage() {
           </div>
         </div>
       )}
+      <Dialog open={!!playing} onOpenChange={(value) => !value && setPlaying(null)}>
+        <DialogContent className="max-w-4xl border-border bg-background p-0">
+          <DialogTitle className="sr-only">{playing?.title ?? "Vídeo"}</DialogTitle>
+          <button
+            type="button"
+            onClick={() => setPlaying(null)}
+            aria-label="Fechar player"
+            className="absolute right-3 top-3 z-10 rounded-full bg-background/80 p-2 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          {playing && (
+            <video
+              src={playing.url}
+              controls
+              autoPlay
+              className="aspect-video w-full rounded-lg bg-black"
+            />
+          )}
+          <div className="px-5 pb-5">
+            <h3 className="font-display text-lg font-semibold">{playing?.title}</h3>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
