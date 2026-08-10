@@ -89,7 +89,7 @@ function SelectionsPage() {
                       · confirmada em {formatDateTime(selection.confirmed_at)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <StatusBadge
                       value={selection.status}
                       label={labelOf(SELECTION_STATUS, selection.status)}
@@ -109,6 +109,19 @@ function SelectionsPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {selection.status !== "aguardando" && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          if (confirm("Reabrir a seleção para o cliente editar novamente?")) {
+                            reopen.mutate(selection.id);
+                          }
+                        }}
+                      >
+                        <RotateCcw className="mr-2 h-3.5 w-3.5" /> Reabrir seleção
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <ul className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
