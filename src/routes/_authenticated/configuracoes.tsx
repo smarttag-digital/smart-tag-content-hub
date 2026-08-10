@@ -13,9 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({
     meta: [
-      { title: "Configurações | SMAR TAG Content Hub" },
+      { title: "Configurações | SMART TAG Content Hub" },
       { name: "description", content: "Personalize a mensagem e os contatos exibidos no portal do cliente." },
-      { property: "og:title", content: "Configurações | SMAR TAG Content Hub" },
+      { property: "og:title", content: "Configurações | SMART TAG Content Hub" },
       { property: "og:description", content: "Personalize a mensagem e os contatos exibidos no portal do cliente." },
     ],
   }),
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/configuracoes")({
 function SettingsPage() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
-    agency_name: "SMAR TAG",
+    agency_name: "SMART TAG",
     portal_message: "",
     email: "",
     phone: "",
@@ -47,7 +47,7 @@ function SettingsPage() {
   useEffect(() => {
     if (data) {
       setForm({
-        agency_name: data.agency_name ?? "SMAR TAG",
+        agency_name: data.agency_name ?? "SMART TAG",
         portal_message: data.portal_message ?? "",
         email: data.email ?? "",
         phone: data.phone ?? "",

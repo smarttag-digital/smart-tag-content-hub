@@ -13,9 +13,9 @@ import { confirmSelection, getPortal, saveVideoNote, toggleVideoSelection } from
 export const Route = createFileRoute("/portal/$slug")({
   head: () => ({
     meta: [
-      { title: "Portal de seleção | SMAR TAG" },
+      { title: "Portal de seleção | SMART TAG" },
       { name: "description", content: "Assista aos vídeos da sua campanha e escolha os conteúdos que deseja receber." },
-      { property: "og:title", content: "Portal de seleção | SMAR TAG" },
+      { property: "og:title", content: "Portal de seleção | SMART TAG" },
       { property: "og:description", content: "Assista aos vídeos da sua campanha e escolha os conteúdos que deseja receber." },
     ],
   }),

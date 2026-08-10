@@ -11,9 +11,9 @@ import { CATEGORIES, VIDEO_STATUS, formatDuration, labelOf } from "@/lib/domain"
 export const Route = createFileRoute("/_authenticated/videos")({
   head: () => ({
     meta: [
-      { title: "Vídeos | SMAR TAG Content Hub" },
+      { title: "Vídeos | SMART TAG Content Hub" },
       { name: "description", content: "Biblioteca completa de vídeos enviados para todas as campanhas." },
-      { property: "og:title", content: "Vídeos | SMAR TAG Content Hub" },
+      { property: "og:title", content: "Vídeos | SMART TAG Content Hub" },
       { property: "og:description", content: "Biblioteca completa de vídeos enviados para todas as campanhas." },
     ],
   }),

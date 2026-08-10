@@ -17,9 +17,9 @@ import { SELECTION_STATUS, formatDateTime, labelOf } from "@/lib/domain";
 export const Route = createFileRoute("/_authenticated/selecoes")({
   head: () => ({
     meta: [
-      { title: "Seleções | SMAR TAG Content Hub" },
+      { title: "Seleções | SMART TAG Content Hub" },
       { name: "description", content: "Acompanhe as escolhas confirmadas pelos clientes e o envio dos conteúdos." },
-      { property: "og:title", content: "Seleções | SMAR TAG Content Hub" },
+      { property: "og:title", content: "Seleções | SMART TAG Content Hub" },
       { property: "og:description", content: "Acompanhe as escolhas confirmadas pelos clientes e o envio dos conteúdos." },
     ],
   }),

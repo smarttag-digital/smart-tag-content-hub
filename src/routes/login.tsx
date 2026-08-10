@@ -12,15 +12,15 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Entrar | SMAR TAG Content Hub" },
+      { title: "Entrar | SMART TAG Content Hub" },
       {
         name: "description",
-        content: "Acesso da equipe SMAR TAG ao painel de gestão de conteúdos e aprovações.",
+        content: "Acesso da equipe SMART TAG ao painel de gestão de conteúdos e aprovações.",
       },
-      { property: "og:title", content: "Entrar | SMAR TAG Content Hub" },
+      { property: "og:title", content: "Entrar | SMART TAG Content Hub" },
       {
         property: "og:description",
-        content: "Acesso da equipe SMAR TAG ao painel de gestão de conteúdos e aprovações.",
+        content: "Acesso da equipe SMART TAG ao painel de gestão de conteúdos e aprovações.",
       },
     ],
   }),
@@ -88,7 +88,7 @@ function LoginPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
           <BrandMark className="h-16 w-16 shadow-glow" />
-          <h1 className="mt-5 font-display text-2xl font-bold tracking-[0.2em]">SMAR TAG</h1>
+          <h1 className="mt-5 font-display text-2xl font-bold tracking-[0.2em]">SMART TAG</h1>
           <p className="mt-1 text-xs font-medium tracking-[0.42em] text-muted-foreground">
             CONTENT HUB
           </p>
@@ -105,7 +105,7 @@ function LoginPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             {mode === "reset"
               ? "Informe seu e-mail para receber o link de redefinição."
-              : "Área exclusiva da equipe SMAR TAG."}
+              : "Área exclusiva da equipe SMART TAG."}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -185,7 +185,7 @@ function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          É cliente da SMAR TAG?{" "}
+          É cliente da SMART TAG?{" "}
           <Link to="/" className="text-foreground underline-offset-4 hover:underline">
             utilize o link privado enviado pela equipe.
           </Link>

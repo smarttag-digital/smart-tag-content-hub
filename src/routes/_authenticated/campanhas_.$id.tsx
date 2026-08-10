@@ -30,12 +30,12 @@ import { readVideoMetadata, signedUrl } from "@/lib/media";
 export const Route = createFileRoute("/_authenticated/campanhas_/$id")({
   head: () => ({
     meta: [
-      { title: "Detalhes da campanha | SMAR TAG Content Hub" },
+      { title: "Detalhes da campanha | SMART TAG Content Hub" },
       {
         name: "description",
         content: "Envie vídeos, acompanhe escolhas do cliente e gerencie o portal da campanha.",
       },
-      { property: "og:title", content: "Detalhes da campanha | SMAR TAG Content Hub" },
+      { property: "og:title", content: "Detalhes da campanha | SMART TAG Content Hub" },
       {
         property: "og:description",
         content: "Envie vídeos, acompanhe escolhas do cliente e gerencie o portal da campanha.",

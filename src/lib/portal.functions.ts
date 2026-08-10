@@ -122,7 +122,7 @@ export const getPortal = createServerFn({ method: "GET" })
 
     return {
       agency: {
-        agency_name: settings?.agency_name ?? "SMAR TAG",
+        agency_name: settings?.agency_name ?? "SMART TAG",
         portal_message:
           settings?.portal_message ??
           "Selecionamos estes conteúdos para sua avaliação. Assista aos vídeos e escolha aqueles que deseja receber.",

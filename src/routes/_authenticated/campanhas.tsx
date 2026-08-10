@@ -30,12 +30,12 @@ import { CAMPAIGN_STATUS, formatPeriod, labelOf, randomSuffix, slugify } from "@
 export const Route = createFileRoute("/_authenticated/campanhas")({
   head: () => ({
     meta: [
-      { title: "Campanhas | SMAR TAG Content Hub" },
+      { title: "Campanhas | SMART TAG Content Hub" },
       {
         name: "description",
         content: "Crie campanhas, publique portais de seleção e acompanhe o status de cada cliente.",
       },
-      { property: "og:title", content: "Campanhas | SMAR TAG Content Hub" },
+      { property: "og:title", content: "Campanhas | SMART TAG Content Hub" },
       {
         property: "og:description",
         content: "Crie campanhas, publique portais de seleção e acompanhe o status de cada cliente.",
