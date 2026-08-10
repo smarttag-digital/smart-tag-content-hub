@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Portal de seleção e aprovação de conteúdos em vídeo da agência SMART TAG para seus clientes.",
       },
-      { name: "author", content: "SMAR TAG" },
+      { name: "author", content: "SMART TAG" },
       { property: "og:title", content: "SMART TAG Content Hub" },
       {
         property: "og:description",

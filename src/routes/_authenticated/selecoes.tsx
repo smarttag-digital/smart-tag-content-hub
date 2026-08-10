@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { EmptyState, LoadingGrid, PageHeader, StatusBadge } from "@/components/admin/ui-bits";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -17,9 +18,9 @@ import { SELECTION_STATUS, formatDateTime, labelOf } from "@/lib/domain";
 export const Route = createFileRoute("/_authenticated/selecoes")({
   head: () => ({
     meta: [
-      { title: "Seleções | SMAR TAG Content Hub" },
+      { title: "Seleções | SMART TAG Content Hub" },
       { name: "description", content: "Acompanhe as escolhas confirmadas pelos clientes e o envio dos conteúdos." },
-      { property: "og:title", content: "Seleções | SMAR TAG Content Hub" },
+      { property: "og:title", content: "Seleções | SMART TAG Content Hub" },
       { property: "og:description", content: "Acompanhe as escolhas confirmadas pelos clientes e o envio dos conteúdos." },
     ],
   }),
@@ -47,6 +48,21 @@ function SelectionsPage() {
     },
     onSuccess: () => {
       toast.success("Status atualizado");
+      queryClient.invalidateQueries({ queryKey: ["selections"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const reopen = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("selections")
+        .update({ status: "aguardando", confirmed_at: null })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Seleção reaberta para o cliente");
       queryClient.invalidateQueries({ queryKey: ["selections"] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -89,7 +105,7 @@ function SelectionsPage() {
                       · confirmada em {formatDateTime(selection.confirmed_at)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <StatusBadge
                       value={selection.status}
                       label={labelOf(SELECTION_STATUS, selection.status)}
@@ -109,6 +125,19 @@ function SelectionsPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {selection.status !== "aguardando" && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          if (confirm("Reabrir a seleção para o cliente editar novamente?")) {
+                            reopen.mutate(selection.id);
+                          }
+                        }}
+                      >
+                        <RotateCcw className="mr-2 h-3.5 w-3.5" /> Reabrir seleção
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <ul className="mt-4 space-y-2 border-t border-border pt-4 text-sm">

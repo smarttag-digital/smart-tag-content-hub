@@ -30,14 +30,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [open, setOpen] = useState(false);
-  const [userLabel, setUserLabel] = useState("Equipe SMAR TAG");
+  const [userLabel, setUserLabel] = useState("Equipe SMART TAG");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const user = data.user;
       if (!user) return;
       const meta = user.user_metadata as { full_name?: string } | null;
-      setUserLabel(meta?.full_name || user.email || "Equipe SMAR TAG");
+      setUserLabel(meta?.full_name || user.email || "Equipe SMART TAG");
     });
   }, []);
 
@@ -120,7 +120,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <Menu className="h-5 w-5" />
             </button>
             <span className="font-display text-sm font-semibold tracking-[0.18em] lg:hidden">
-              SMAR TAG
+              SMART TAG
             </span>
           </div>
           <div className="flex items-center gap-3">

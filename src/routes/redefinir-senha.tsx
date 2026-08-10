@@ -12,10 +12,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/redefinir-senha")({
   head: () => ({
     meta: [
-      { title: "Redefinir senha | SMAR TAG Content Hub" },
-      { name: "description", content: "Defina uma nova senha para acessar o painel SMAR TAG." },
-      { property: "og:title", content: "Redefinir senha | SMAR TAG Content Hub" },
-      { property: "og:description", content: "Defina uma nova senha para acessar o painel SMAR TAG." },
+      { title: "Redefinir senha | SMART TAG Content Hub" },
+      { name: "description", content: "Defina uma nova senha para acessar o painel SMART TAG." },
+      { property: "og:title", content: "Redefinir senha | SMART TAG Content Hub" },
+      { property: "og:description", content: "Defina uma nova senha para acessar o painel SMART TAG." },
     ],
   }),
   ssr: false,
@@ -47,7 +47,7 @@ function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center">
           <BrandMark className="h-14 w-14" />
-          <h1 className="mt-4 font-display text-xl font-bold tracking-[0.2em]">SMAR TAG</h1>
+          <h1 className="mt-4 font-display text-xl font-bold tracking-[0.2em]">SMART TAG</h1>
         </div>
         <form onSubmit={handleSubmit} className="surface-panel space-y-4 p-7 shadow-elevated">
           <h2 className="font-display text-lg font-semibold">Definir nova senha</h2>

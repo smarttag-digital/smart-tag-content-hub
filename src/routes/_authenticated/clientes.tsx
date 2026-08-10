@@ -30,10 +30,10 @@ import { CLIENT_STATUS, formatDate, labelOf, randomSuffix, slugify } from "@/lib
 export const Route = createFileRoute("/_authenticated/clientes")({
   head: () => ({
     meta: [
-      { title: "Clientes | SMAR TAG Content Hub" },
-      { name: "description", content: "Cadastro e gestão dos clientes atendidos pela SMAR TAG." },
-      { property: "og:title", content: "Clientes | SMAR TAG Content Hub" },
-      { property: "og:description", content: "Cadastro e gestão dos clientes atendidos pela SMAR TAG." },
+      { title: "Clientes | SMART TAG Content Hub" },
+      { name: "description", content: "Cadastro e gestão dos clientes atendidos pela SMART TAG." },
+      { property: "og:title", content: "Clientes | SMART TAG Content Hub" },
+      { property: "og:description", content: "Cadastro e gestão dos clientes atendidos pela SMART TAG." },
     ],
   }),
   component: ClientsPage,

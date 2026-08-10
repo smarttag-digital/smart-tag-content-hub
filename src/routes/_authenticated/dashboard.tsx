@@ -9,15 +9,15 @@ import { CAMPAIGN_STATUS, formatDateTime, formatPeriod, labelOf } from "@/lib/do
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard | SMAR TAG Content Hub" },
+      { title: "Dashboard | SMART TAG Content Hub" },
       {
         name: "description",
-        content: "Indicadores de clientes, campanhas, vídeos e seleções da agência SMAR TAG.",
+        content: "Indicadores de clientes, campanhas, vídeos e seleções da agência SMART TAG.",
       },
-      { property: "og:title", content: "Dashboard | SMAR TAG Content Hub" },
+      { property: "og:title", content: "Dashboard | SMART TAG Content Hub" },
       {
         property: "og:description",
-        content: "Indicadores de clientes, campanhas, vídeos e seleções da agência SMAR TAG.",
+        content: "Indicadores de clientes, campanhas, vídeos e seleções da agência SMART TAG.",
       },
     ],
   }),
