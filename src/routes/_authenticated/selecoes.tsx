@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { EmptyState, LoadingGrid, PageHeader, StatusBadge } from "@/components/admin/ui-bits";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -47,6 +48,21 @@ function SelectionsPage() {
     },
     onSuccess: () => {
       toast.success("Status atualizado");
+      queryClient.invalidateQueries({ queryKey: ["selections"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const reopen = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("selections")
+        .update({ status: "aguardando", confirmed_at: null })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Seleção reaberta para o cliente");
       queryClient.invalidateQueries({ queryKey: ["selections"] });
     },
     onError: (error: Error) => toast.error(error.message),
