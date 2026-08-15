@@ -23,6 +23,7 @@ const NAV = [
   { to: "/campanhas", label: "Campanhas", icon: Megaphone },
   { to: "/videos", label: "Vídeos", icon: Film },
   { to: "/selecoes", label: "Seleções", icon: CheckSquare },
+  { to: "/materiais", label: "Materiais", icon: Package },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
 ] as const;
 

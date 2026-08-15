@@ -17,6 +17,7 @@ import { Route as AuthenticatedCampanhasRouteImport } from './routes/_authentica
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedMateriaisRouteImport } from './routes/_authenticated/materiais'
 import { Route as AuthenticatedSelecoesRouteImport } from './routes/_authenticated/selecoes'
 import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
@@ -62,6 +63,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMateriaisRoute = AuthenticatedMateriaisRouteImport.update({
+  id: '/materiais',
+  path: '/materiais',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSelecoesRoute = AuthenticatedSelecoesRouteImport.update({
   id: '/selecoes',
   path: '/selecoes',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/materiais': typeof AuthenticatedMateriaisRoute
   '/selecoes': typeof AuthenticatedSelecoesRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/materiais': typeof AuthenticatedMateriaisRoute
   '/selecoes': typeof AuthenticatedSelecoesRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/materiais': typeof AuthenticatedMateriaisRoute
   '/_authenticated/selecoes': typeof AuthenticatedSelecoesRoute
   '/_authenticated/videos': typeof AuthenticatedVideosRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/configuracoes'
     | '/dashboard'
+    | '/materiais'
     | '/selecoes'
     | '/videos'
     | '/portal/$slug'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/configuracoes'
     | '/dashboard'
+    | '/materiais'
     | '/selecoes'
     | '/videos'
     | '/portal/$slug'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes'
     | '/_authenticated/configuracoes'
     | '/_authenticated/dashboard'
+    | '/_authenticated/materiais'
     | '/_authenticated/selecoes'
     | '/_authenticated/videos'
     | '/portal/$slug'
@@ -234,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/materiais': {
+      id: '/_authenticated/materiais'
+      path: '/materiais'
+      fullPath: '/materiais'
+      preLoaderRoute: typeof AuthenticatedMateriaisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/selecoes': {
       id: '/_authenticated/selecoes'
       path: '/selecoes'
@@ -270,6 +289,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMateriaisRoute: typeof AuthenticatedMateriaisRoute
   AuthenticatedSelecoesRoute: typeof AuthenticatedSelecoesRoute
   AuthenticatedVideosRoute: typeof AuthenticatedVideosRoute
   AuthenticatedCampanhasIdRoute: typeof AuthenticatedCampanhasIdRoute
@@ -280,6 +300,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMateriaisRoute: AuthenticatedMateriaisRoute,
   AuthenticatedSelecoesRoute: AuthenticatedSelecoesRoute,
   AuthenticatedVideosRoute: AuthenticatedVideosRoute,
   AuthenticatedCampanhasIdRoute: AuthenticatedCampanhasIdRoute,
