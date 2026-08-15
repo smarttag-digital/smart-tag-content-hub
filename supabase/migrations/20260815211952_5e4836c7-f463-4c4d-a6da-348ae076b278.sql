@@ -1,0 +1,4 @@
+CREATE POLICY "admins read materials storage" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'materials' AND is_admin());
+CREATE POLICY "admins write materials storage" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'materials' AND is_admin());
+CREATE POLICY "admins update materials storage" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'materials' AND is_admin()) WITH CHECK (bucket_id = 'materials' AND is_admin());
+CREATE POLICY "admins delete materials storage" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'materials' AND is_admin());

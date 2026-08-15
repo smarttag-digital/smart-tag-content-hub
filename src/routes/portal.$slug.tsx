@@ -2,14 +2,50 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Loader2, Film, Play, X } from "lucide-react";
+import {
+  Check,
+  Clock,
+  Download,
+  FileArchive,
+  FileText,
+  Image as ImageIcon,
+  Layers,
+  Loader2,
+  Film,
+  Package,
+  Play,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { CATEGORIES, formatDuration, formatPeriod, labelOf } from "@/lib/domain";
-import { confirmSelection, getPortal, saveVideoNote, toggleVideoSelection } from "@/lib/portal.functions";
+import {
+  CATEGORIES,
+  MATERIAL_TYPES,
+  formatBytes,
+  formatCountdown,
+  formatDuration,
+  formatPeriod,
+  labelOf,
+} from "@/lib/domain";
+import {
+  confirmSelection,
+  downloadMaterial,
+  getPortal,
+  getPortalMaterials,
+  saveVideoNote,
+  toggleVideoSelection,
+} from "@/lib/portal.functions";
+
+const MATERIAL_ICON: Record<string, typeof Film> = {
+  video: Film,
+  imagem: ImageIcon,
+  carrossel: Layers,
+  pdf: FileText,
+  zip: FileArchive,
+};
 
 export const Route = createFileRoute("/portal/$slug")({
   head: () => ({
@@ -64,6 +100,26 @@ function PortalPage() {
     onSuccess: () => {
       toast.success("Seleção confirmada! Nossa equipe já foi avisada.");
       invalidate();
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const loadMaterials = useServerFn(getPortalMaterials);
+  const download = useServerFn(downloadMaterial);
+
+  const { data: materials } = useQuery({
+    queryKey: ["portal-materials", slug],
+    queryFn: () => loadMaterials({ data: { slug } }),
+    retry: false,
+    refetchInterval: 60_000,
+  });
+
+  const downloadMutation = useMutation({
+    mutationFn: (materialId: string) => download({ data: { slug, materialId } }),
+    onSuccess: (result) => {
+      window.open(result.url, "_blank", "noopener");
+      toast.success("Download liberado");
+      queryClient.invalidateQueries({ queryKey: ["portal-materials", slug] });
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -241,6 +297,71 @@ function PortalPage() {
           </p>
         )}
       </div>
+
+      {!!materials?.length && (
+        <section className="mx-auto max-w-6xl px-4 pb-10 lg:px-10">
+          <div className="mb-5 flex items-center gap-2">
+            <Package className="h-5 w-5 text-brand-violet" />
+            <h2 className="font-display text-xl font-semibold">Materiais disponíveis</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {materials.map((material) => {
+              const Icon = MATERIAL_ICON[material.file_type] ?? Package;
+              return (
+                <article
+                  key={material.id}
+                  className={
+                    material.expired
+                      ? "surface-panel space-y-3 p-5 opacity-60"
+                      : "surface-panel space-y-3 p-5"
+                  }
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="gradient-brand flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary-foreground">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="truncate font-display font-semibold">{material.name}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {labelOf(MATERIAL_TYPES, material.file_type)} ·{" "}
+                        {formatBytes(material.file_size)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {material.description && (
+                    <p className="text-sm text-muted-foreground">{material.description}</p>
+                  )}
+
+                  <p
+                    className={
+                      material.expired
+                        ? "flex items-center gap-1.5 text-xs text-destructive"
+                        : "flex items-center gap-1.5 text-xs text-muted-foreground"
+                    }
+                  >
+                    <Clock className="h-3.5 w-3.5" />
+                    {material.expired
+                      ? "Link expirado — solicite a liberação à equipe"
+                      : formatCountdown(material.expires_at)}
+                  </p>
+
+                  <Button
+                    className={material.expired ? "w-full" : "gradient-brand w-full"}
+                    variant={material.expired ? "secondary" : "default"}
+                    disabled={material.expired || downloadMutation.isPending}
+                    onClick={() => downloadMutation.mutate(material.id)}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    {material.expired ? "Indisponível" : "Baixar material"}
+                  </Button>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
 
       {!data.locked && (
         <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/90 px-4 py-4 backdrop-blur-xl lg:px-10">

@@ -1,10 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Megaphone, Film, CheckSquare, Clock, ArrowRight } from "lucide-react";
+import {
+  Users,
+  Megaphone,
+  Film,
+  CheckSquare,
+  Clock,
+  ArrowRight,
+  AlertTriangle,
+  Download,
+  Package,
+} from "lucide-react";
 
 import { PageHeader, StatusBadge, LoadingGrid, EmptyState } from "@/components/admin/ui-bits";
 import { supabase } from "@/integrations/supabase/client";
-import { CAMPAIGN_STATUS, formatDateTime, formatPeriod, labelOf } from "@/lib/domain";
+import {
+  CAMPAIGN_STATUS,
+  formatCountdown,
+  formatDateTime,
+  formatPeriod,
+  hoursUntil,
+  isExpired,
+  labelOf,
+} from "@/lib/domain";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -28,27 +46,40 @@ function DashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard"],
     queryFn: async () => {
-      const [clients, campaigns, videos, selections, logs, recentCampaigns] = await Promise.all([
-        supabase.from("clients").select("id", { count: "exact", head: true }).eq("status", "ativo"),
-        supabase
-          .from("campaigns")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "publicada"),
-        supabase.from("videos").select("id, status"),
-        supabase.from("selections").select("id, status"),
-        supabase
-          .from("activity_logs")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(8),
-        supabase
-          .from("campaigns")
-          .select("*, clients(company_name), videos(id, status)")
-          .order("created_at", { ascending: false })
-          .limit(5),
-      ]);
+      const [clients, campaigns, videos, selections, logs, recentCampaigns, materials, downloads] =
+        await Promise.all([
+          supabase.from("clients").select("id", { count: "exact", head: true }).eq("status", "ativo"),
+          supabase
+            .from("campaigns")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "publicada"),
+          supabase.from("videos").select("id, status"),
+          supabase.from("selections").select("id, status"),
+          supabase
+            .from("activity_logs")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(8),
+          supabase
+            .from("campaigns")
+            .select("*, clients(company_name), videos(id, status)")
+            .order("created_at", { ascending: false })
+            .limit(5),
+          supabase
+            .from("materials")
+            .select("id, name, status, expires_at, clients(company_name), campaigns(name)")
+            .eq("status", "publicado"),
+          supabase.from("material_downloads").select("id", { count: "exact", head: true }),
+        ]);
 
       const allVideos = videos.data ?? [];
+      const allMaterials = materials.data ?? [];
+      const active = allMaterials.filter((material) => !isExpired(material.expires_at));
+      const expiringSoon = active.filter((material) => {
+        const hours = hoursUntil(material.expires_at);
+        return hours !== null && hours <= 24;
+      });
+
       return {
         clients: clients.count ?? 0,
         campaigns: campaigns.count ?? 0,
@@ -57,6 +88,10 @@ function DashboardPage() {
         waitingSend: allVideos.filter((video) => video.status === "preparacao").length,
         pendingSelections: (selections.data ?? []).filter((item) => item.status === "confirmada")
           .length,
+        activeMaterials: active.length,
+        expiredMaterials: allMaterials.length - active.length,
+        downloads: downloads.count ?? 0,
+        expiringSoon,
         logs: logs.data ?? [],
         recentCampaigns: recentCampaigns.data ?? [],
       };
@@ -69,7 +104,11 @@ function DashboardPage() {
     { label: "Vídeos publicados", value: data?.videos ?? 0, icon: Film },
     { label: "Vídeos selecionados", value: data?.selected ?? 0, icon: CheckSquare },
     { label: "Aguardando envio", value: data?.waitingSend ?? 0, icon: Clock },
+    { label: "Materiais disponíveis", value: data?.activeMaterials ?? 0, icon: Package },
+    { label: "Materiais expirados", value: data?.expiredMaterials ?? 0, icon: AlertTriangle },
+    { label: "Downloads realizados", value: data?.downloads ?? 0, icon: Download },
   ];
+
 
   return (
     <>
@@ -78,7 +117,7 @@ function DashboardPage() {
         description="Visão geral das campanhas, conteúdos e aprovações dos seus clientes."
       />
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {kpis.map((kpi) => (
           <div key={kpi.label} className="surface-panel p-5 transition-transform hover:-translate-y-0.5">
             <div className="flex items-center justify-between">
@@ -91,6 +130,37 @@ function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {!!data?.expiringSoon.length && (
+        <div className="surface-panel mt-5 border-amber-500/30 p-5">
+          <p className="flex items-center gap-2 font-display font-semibold text-amber-300">
+            <AlertTriangle className="h-4 w-4" /> Materiais expirando nas próximas 24h
+          </p>
+          <ul className="mt-3 space-y-2 text-sm">
+            {data.expiringSoon.map((material) => (
+              <li key={material.id} className="flex flex-wrap justify-between gap-2">
+                <span>
+                  {material.name} ·{" "}
+                  <span className="text-muted-foreground">
+                    {(material.clients as { company_name: string } | null)?.company_name ?? "—"} /{" "}
+                    {(material.campaigns as { name: string } | null)?.name ?? "—"}
+                  </span>
+                </span>
+                <span className="text-xs text-amber-300">
+                  {formatCountdown(material.expires_at)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Link
+            to="/materiais"
+            className="mt-4 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Gerenciar materiais <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
+
 
       <div className="mt-6 grid gap-5 lg:grid-cols-5">
         <section className="surface-panel p-6 lg:col-span-3">

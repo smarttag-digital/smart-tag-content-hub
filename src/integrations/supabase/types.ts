@@ -23,6 +23,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          material_id: string | null
           user_id: string | null
           video_id: string | null
         }
@@ -34,6 +35,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          material_id?: string | null
           user_id?: string | null
           video_id?: string | null
         }
@@ -45,6 +47,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          material_id?: string | null
           user_id?: string | null
           video_id?: string | null
         }
@@ -61,6 +64,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_logs_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
             referencedColumns: ["id"]
           },
           {
@@ -196,6 +206,136 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      material_downloads: {
+        Row: {
+          campaign_id: string
+          client_id: string
+          created_at: string
+          downloaded_at: string
+          file_name: string | null
+          id: string
+          material_id: string
+          status: string
+        }
+        Insert: {
+          campaign_id: string
+          client_id: string
+          created_at?: string
+          downloaded_at?: string
+          file_name?: string | null
+          id?: string
+          material_id: string
+          status?: string
+        }
+        Update: {
+          campaign_id?: string
+          client_id?: string
+          created_at?: string
+          downloaded_at?: string
+          file_name?: string | null
+          id?: string
+          material_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_downloads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_downloads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_downloads_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      materials: {
+        Row: {
+          campaign_id: string
+          client_id: string
+          created_at: string
+          description: string | null
+          duration_days: number
+          expires_at: string | null
+          file_mime: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          name: string
+          published_at: string | null
+          republished_count: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          client_id: string
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          expires_at?: string | null
+          file_mime?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          name: string
+          published_at?: string | null
+          republished_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          expires_at?: string | null
+          file_mime?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          name?: string
+          published_at?: string | null
+          republished_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
