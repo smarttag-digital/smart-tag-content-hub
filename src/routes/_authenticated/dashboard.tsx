@@ -28,27 +28,40 @@ function DashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard"],
     queryFn: async () => {
-      const [clients, campaigns, videos, selections, logs, recentCampaigns] = await Promise.all([
-        supabase.from("clients").select("id", { count: "exact", head: true }).eq("status", "ativo"),
-        supabase
-          .from("campaigns")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "publicada"),
-        supabase.from("videos").select("id, status"),
-        supabase.from("selections").select("id, status"),
-        supabase
-          .from("activity_logs")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(8),
-        supabase
-          .from("campaigns")
-          .select("*, clients(company_name), videos(id, status)")
-          .order("created_at", { ascending: false })
-          .limit(5),
-      ]);
+      const [clients, campaigns, videos, selections, logs, recentCampaigns, materials, downloads] =
+        await Promise.all([
+          supabase.from("clients").select("id", { count: "exact", head: true }).eq("status", "ativo"),
+          supabase
+            .from("campaigns")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "publicada"),
+          supabase.from("videos").select("id, status"),
+          supabase.from("selections").select("id, status"),
+          supabase
+            .from("activity_logs")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(8),
+          supabase
+            .from("campaigns")
+            .select("*, clients(company_name), videos(id, status)")
+            .order("created_at", { ascending: false })
+            .limit(5),
+          supabase
+            .from("materials")
+            .select("id, name, status, expires_at, clients(company_name), campaigns(name)")
+            .eq("status", "publicado"),
+          supabase.from("material_downloads").select("id", { count: "exact", head: true }),
+        ]);
 
       const allVideos = videos.data ?? [];
+      const allMaterials = materials.data ?? [];
+      const active = allMaterials.filter((material) => !isExpired(material.expires_at));
+      const expiringSoon = active.filter((material) => {
+        const hours = hoursUntil(material.expires_at);
+        return hours !== null && hours <= 24;
+      });
+
       return {
         clients: clients.count ?? 0,
         campaigns: campaigns.count ?? 0,
@@ -57,6 +70,10 @@ function DashboardPage() {
         waitingSend: allVideos.filter((video) => video.status === "preparacao").length,
         pendingSelections: (selections.data ?? []).filter((item) => item.status === "confirmada")
           .length,
+        activeMaterials: active.length,
+        expiredMaterials: allMaterials.length - active.length,
+        downloads: downloads.count ?? 0,
+        expiringSoon,
         logs: logs.data ?? [],
         recentCampaigns: recentCampaigns.data ?? [],
       };
@@ -69,7 +86,11 @@ function DashboardPage() {
     { label: "Vídeos publicados", value: data?.videos ?? 0, icon: Film },
     { label: "Vídeos selecionados", value: data?.selected ?? 0, icon: CheckSquare },
     { label: "Aguardando envio", value: data?.waitingSend ?? 0, icon: Clock },
+    { label: "Materiais disponíveis", value: data?.activeMaterials ?? 0, icon: Package },
+    { label: "Materiais expirados", value: data?.expiredMaterials ?? 0, icon: AlertTriangle },
+    { label: "Downloads realizados", value: data?.downloads ?? 0, icon: Download },
   ];
+
 
   return (
     <>
