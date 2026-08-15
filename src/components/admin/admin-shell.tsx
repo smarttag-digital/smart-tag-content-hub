@@ -8,6 +8,7 @@ import {
   CheckSquare,
   Settings,
   LogOut,
+  Package,
   Menu,
   X,
 } from "lucide-react";
