@@ -81,3 +81,58 @@ export function slugify(value: string) {
 export function randomSuffix() {
   return Math.random().toString(36).slice(2, 8);
 }
+
+export const MATERIAL_TYPES = [
+  { value: "video", label: "Vídeo" },
+  { value: "imagem", label: "Imagem" },
+  { value: "carrossel", label: "Carrossel" },
+  { value: "pdf", label: "PDF" },
+  { value: "zip", label: "ZIP" },
+] as const;
+
+export const MATERIAL_STATUS = [
+  { value: "rascunho", label: "Rascunho" },
+  { value: "publicado", label: "Disponível" },
+] as const;
+
+export function guessMaterialType(fileName: string, mime?: string | null) {
+  const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+  if (mime?.startsWith("video/") || ["mp4", "mov", "webm", "avi"].includes(ext)) return "video";
+  if (mime?.startsWith("image/") || ["jpg", "jpeg", "png", "webp", "gif"].includes(ext)) return "imagem";
+  if (ext === "pdf" || mime === "application/pdf") return "pdf";
+  if (["zip", "rar", "7z"].includes(ext)) return "zip";
+  return "imagem";
+}
+
+export function formatBytes(bytes?: number | null) {
+  if (!bytes) return "—";
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let index = 0;
+  while (value >= 1024 && index < units.length - 1) {
+    value /= 1024;
+    index += 1;
+  }
+  return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+}
+
+export function isExpired(expiresAt?: string | null) {
+  if (!expiresAt) return false;
+  return new Date(expiresAt).getTime() <= Date.now();
+}
+
+export function hoursUntil(expiresAt?: string | null) {
+  if (!expiresAt) return null;
+  return (new Date(expiresAt).getTime() - Date.now()) / 36e5;
+}
+
+export function formatCountdown(expiresAt?: string | null) {
+  const hours = hoursUntil(expiresAt);
+  if (hours === null) return "Sem prazo";
+  if (hours <= 0) return "Expirado";
+  const days = Math.floor(hours / 24);
+  const rest = Math.floor(hours % 24);
+  if (days > 0) return `${days}d ${rest}h restantes`;
+  const minutes = Math.floor((hours % 1) * 60);
+  return `${rest}h ${minutes}min restantes`;
+}
