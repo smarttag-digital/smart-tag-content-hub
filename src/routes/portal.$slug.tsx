@@ -104,6 +104,26 @@ function PortalPage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const loadMaterials = useServerFn(getPortalMaterials);
+  const download = useServerFn(downloadMaterial);
+
+  const { data: materials } = useQuery({
+    queryKey: ["portal-materials", slug],
+    queryFn: () => loadMaterials({ data: { slug } }),
+    retry: false,
+    refetchInterval: 60_000,
+  });
+
+  const downloadMutation = useMutation({
+    mutationFn: (materialId: string) => download({ data: { slug, materialId } }),
+    onSuccess: (result) => {
+      window.open(result.url, "_blank", "noopener");
+      toast.success("Download liberado");
+      queryClient.invalidateQueries({ queryKey: ["portal-materials", slug] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   if (isLoading) {
     return (
       <main className="aurora flex min-h-screen items-center justify-center">
