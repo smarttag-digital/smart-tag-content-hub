@@ -2,14 +2,50 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Loader2, Film, Play, X } from "lucide-react";
+import {
+  Check,
+  Clock,
+  Download,
+  FileArchive,
+  FileText,
+  Image as ImageIcon,
+  Layers,
+  Loader2,
+  Film,
+  Package,
+  Play,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { CATEGORIES, formatDuration, formatPeriod, labelOf } from "@/lib/domain";
-import { confirmSelection, getPortal, saveVideoNote, toggleVideoSelection } from "@/lib/portal.functions";
+import {
+  CATEGORIES,
+  MATERIAL_TYPES,
+  formatBytes,
+  formatCountdown,
+  formatDuration,
+  formatPeriod,
+  labelOf,
+} from "@/lib/domain";
+import {
+  confirmSelection,
+  downloadMaterial,
+  getPortal,
+  getPortalMaterials,
+  saveVideoNote,
+  toggleVideoSelection,
+} from "@/lib/portal.functions";
+
+const MATERIAL_ICON: Record<string, typeof Film> = {
+  video: Film,
+  imagem: ImageIcon,
+  carrossel: Layers,
+  pdf: FileText,
+  zip: FileArchive,
+};
 
 export const Route = createFileRoute("/portal/$slug")({
   head: () => ({
