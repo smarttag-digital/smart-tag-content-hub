@@ -1,10 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Megaphone, Film, CheckSquare, Clock, ArrowRight } from "lucide-react";
+import {
+  Users,
+  Megaphone,
+  Film,
+  CheckSquare,
+  Clock,
+  ArrowRight,
+  AlertTriangle,
+  Download,
+  Package,
+} from "lucide-react";
 
 import { PageHeader, StatusBadge, LoadingGrid, EmptyState } from "@/components/admin/ui-bits";
 import { supabase } from "@/integrations/supabase/client";
-import { CAMPAIGN_STATUS, formatDateTime, formatPeriod, labelOf } from "@/lib/domain";
+import {
+  CAMPAIGN_STATUS,
+  formatCountdown,
+  formatDateTime,
+  formatPeriod,
+  hoursUntil,
+  isExpired,
+  labelOf,
+} from "@/lib/domain";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
