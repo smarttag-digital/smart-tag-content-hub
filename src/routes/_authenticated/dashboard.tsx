@@ -117,7 +117,7 @@ function DashboardPage() {
         description="Visão geral das campanhas, conteúdos e aprovações dos seus clientes."
       />
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {kpis.map((kpi) => (
           <div key={kpi.label} className="surface-panel p-5 transition-transform hover:-translate-y-0.5">
             <div className="flex items-center justify-between">
@@ -130,6 +130,37 @@ function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {!!data?.expiringSoon.length && (
+        <div className="surface-panel mt-5 border-amber-500/30 p-5">
+          <p className="flex items-center gap-2 font-display font-semibold text-amber-300">
+            <AlertTriangle className="h-4 w-4" /> Materiais expirando nas próximas 24h
+          </p>
+          <ul className="mt-3 space-y-2 text-sm">
+            {data.expiringSoon.map((material) => (
+              <li key={material.id} className="flex flex-wrap justify-between gap-2">
+                <span>
+                  {material.name} ·{" "}
+                  <span className="text-muted-foreground">
+                    {(material.clients as { company_name: string } | null)?.company_name ?? "—"} /{" "}
+                    {(material.campaigns as { name: string } | null)?.name ?? "—"}
+                  </span>
+                </span>
+                <span className="text-xs text-amber-300">
+                  {formatCountdown(material.expires_at)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Link
+            to="/materiais"
+            className="mt-4 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Gerenciar materiais <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
+
 
       <div className="mt-6 grid gap-5 lg:grid-cols-5">
         <section className="surface-panel p-6 lg:col-span-3">
