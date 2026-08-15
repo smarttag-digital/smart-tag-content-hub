@@ -35,6 +35,8 @@ const TONES: Record<string, string> = {
   encerrada: "bg-secondary text-muted-foreground border-border",
   ativo: "bg-emerald-500/12 text-emerald-300 border-emerald-500/25",
   inativo: "bg-secondary text-muted-foreground border-border",
+  publicado: "bg-emerald-500/12 text-emerald-300 border-emerald-500/25",
+  expirado: "bg-destructive/15 text-destructive border-destructive/30",
 };
 
 export function StatusBadge({ value, label }: { value: string; label: string }) {
