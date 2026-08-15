@@ -290,3 +290,93 @@ export const confirmSelection = createServerFn({ method: "POST" })
 
     return { ok: true, count };
   });
+
+export type PortalMaterial = {
+  id: string;
+  name: string;
+  description: string | null;
+  file_type: string;
+  file_name: string;
+  file_size: number;
+  published_at: string | null;
+  expires_at: string | null;
+  expired: boolean;
+};
+
+export const getPortalMaterials = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => slugInput.parse(input))
+  .handler(async ({ data }): Promise<PortalMaterial[]> => {
+    const { supabaseAdmin, campaign } = await loadContext(data.slug);
+    const { data: materials } = await supabaseAdmin
+      .from("materials")
+      .select("*")
+      .eq("campaign_id", campaign.id)
+      .eq("status", "publicado")
+      .order("created_at", { ascending: false });
+
+    return (materials ?? []).map((material) => ({
+      id: material.id,
+      name: material.name,
+      description: material.description,
+      file_type: material.file_type,
+      file_name: material.file_name,
+      file_size: Number(material.file_size ?? 0),
+      published_at: material.published_at,
+      expires_at: material.expires_at,
+      expired: material.expires_at ? new Date(material.expires_at).getTime() <= Date.now() : false,
+    }));
+  });
+
+export const downloadMaterial = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ slug: z.string().min(1), materialId: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data }): Promise<{ url: string; fileName: string }> => {
+    const { supabaseAdmin, campaign } = await loadContext(data.slug);
+
+    const { data: material } = await supabaseAdmin
+      .from("materials")
+      .select("*")
+      .eq("id", data.materialId)
+      .maybeSingle();
+
+    if (!material || material.campaign_id !== campaign.id) throw new Error("Material inválido");
+    if (material.status !== "publicado") throw new Error("Material indisponível");
+    if (material.expires_at && new Date(material.expires_at).getTime() <= Date.now()) {
+      await supabaseAdmin.from("material_downloads").insert({
+        material_id: material.id,
+        client_id: campaign.client_id,
+        campaign_id: campaign.id,
+        file_name: material.file_name,
+        status: "expirado",
+      });
+      throw new Error("Este material expirou. Solicite a liberação à equipe SMART TAG.");
+    }
+
+    const { data: signed } = await supabaseAdmin.storage
+      .from("materials")
+      .createSignedUrl(material.file_path, 60 * 5, { download: material.file_name });
+
+    if (!signed?.signedUrl) throw new Error("Não foi possível gerar o link de download");
+
+    const client = campaign.clients as unknown as { company_name: string };
+
+    await supabaseAdmin.from("material_downloads").insert({
+      material_id: material.id,
+      client_id: campaign.client_id,
+      campaign_id: campaign.id,
+      file_name: material.file_name,
+      status: "autorizado",
+    });
+
+    await supabaseAdmin.from("activity_logs").insert({
+      actor: "cliente",
+      action: "material_baixado",
+      description: `${client.company_name} baixou o material "${material.name}"`,
+      client_id: campaign.client_id,
+      campaign_id: campaign.id,
+      material_id: material.id,
+    });
+
+    return { url: signed.signedUrl, fileName: material.file_name };
+  });
