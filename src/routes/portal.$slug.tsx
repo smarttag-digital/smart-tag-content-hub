@@ -298,6 +298,71 @@ function PortalPage() {
         )}
       </div>
 
+      {!!materials?.length && (
+        <section className="mx-auto max-w-6xl px-4 pb-10 lg:px-10">
+          <div className="mb-5 flex items-center gap-2">
+            <Package className="h-5 w-5 text-brand-violet" />
+            <h2 className="font-display text-xl font-semibold">Materiais disponíveis</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {materials.map((material) => {
+              const Icon = MATERIAL_ICON[material.file_type] ?? Package;
+              return (
+                <article
+                  key={material.id}
+                  className={
+                    material.expired
+                      ? "surface-panel space-y-3 p-5 opacity-60"
+                      : "surface-panel space-y-3 p-5"
+                  }
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="gradient-brand flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary-foreground">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="truncate font-display font-semibold">{material.name}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {labelOf(MATERIAL_TYPES, material.file_type)} ·{" "}
+                        {formatBytes(material.file_size)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {material.description && (
+                    <p className="text-sm text-muted-foreground">{material.description}</p>
+                  )}
+
+                  <p
+                    className={
+                      material.expired
+                        ? "flex items-center gap-1.5 text-xs text-destructive"
+                        : "flex items-center gap-1.5 text-xs text-muted-foreground"
+                    }
+                  >
+                    <Clock className="h-3.5 w-3.5" />
+                    {material.expired
+                      ? "Link expirado — solicite a liberação à equipe"
+                      : formatCountdown(material.expires_at)}
+                  </p>
+
+                  <Button
+                    className={material.expired ? "w-full" : "gradient-brand w-full"}
+                    variant={material.expired ? "secondary" : "default"}
+                    disabled={material.expired || downloadMutation.isPending}
+                    onClick={() => downloadMutation.mutate(material.id)}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    {material.expired ? "Indisponível" : "Baixar material"}
+                  </Button>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+
       {!data.locked && (
         <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/90 px-4 py-4 backdrop-blur-xl lg:px-10">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
