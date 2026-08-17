@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 
 import { BrandLockup } from "@/components/brand";
+import { NotificationsBell } from "@/components/admin/notifications-bell";
+
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -126,6 +128,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationsBell />
+
             <div className="text-right">
               <p className="text-sm font-medium leading-tight">{userLabel}</p>
               <p className="text-[11px] text-muted-foreground">Administrador</p>

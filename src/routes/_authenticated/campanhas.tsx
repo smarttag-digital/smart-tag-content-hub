@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Megaphone, Copy, ExternalLink, Trash2 } from "lucide-react";
+import { Plus, Megaphone, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { AccessLinkActions } from "@/components/admin/access-link";
 import { EmptyState, LoadingGrid, PageHeader, StatusBadge } from "@/components/admin/ui-bits";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -131,11 +133,7 @@ function CampaignsPage() {
     (campaign) => filter === "todas" || campaign.status === filter,
   );
 
-  function copyLink(slug: string) {
-    const url = `${window.location.origin}/portal/${slug}`;
-    navigator.clipboard.writeText(url);
-    toast.success("Link do portal copiado!");
-  }
+
 
   return (
     <>
@@ -204,18 +202,9 @@ function CampaignsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   {videos.length} vídeos · {chosen} escolhidos
                 </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button size="sm" variant="secondary" onClick={() => copyLink(campaign.slug)}>
-                    <Copy className="mr-2 h-3.5 w-3.5" /> Copiar link
-                  </Button>
-                  <a
-                    href={`/portal/${campaign.slug}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    <ExternalLink className="mr-2 h-3.5 w-3.5" /> Abrir portal
-                  </a>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <AccessLinkActions campaign={campaign} />
+
                   <Link
                     to="/campanhas/$id"
                     params={{ id: campaign.id }}

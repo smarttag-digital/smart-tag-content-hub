@@ -80,14 +80,16 @@ function DashboardPage() {
         return hours !== null && hours <= 24;
       });
 
+      const allSelections = selections.data ?? [];
+
       return {
         clients: clients.count ?? 0,
         campaigns: campaigns.count ?? 0,
         videos: allVideos.length,
         selected: allVideos.filter((video) => video.status === "selecionado").length,
         waitingSend: allVideos.filter((video) => video.status === "preparacao").length,
-        pendingSelections: (selections.data ?? []).filter((item) => item.status === "confirmada")
-          .length,
+        awaitingSelections: allSelections.filter((item) => item.status === "aguardando").length,
+        confirmedSelections: allSelections.filter((item) => item.status === "confirmada").length,
         activeMaterials: active.length,
         expiredMaterials: allMaterials.length - active.length,
         downloads: downloads.count ?? 0,
@@ -100,14 +102,48 @@ function DashboardPage() {
 
   const kpis = [
     { label: "Clientes ativos", value: data?.clients ?? 0, icon: Users },
-    { label: "Campanhas publicadas", value: data?.campaigns ?? 0, icon: Megaphone },
+    { label: "Campanhas ativas", value: data?.campaigns ?? 0, icon: Megaphone },
+    { label: "Seleções aguardando", value: data?.awaitingSelections ?? 0, icon: Clock },
+    { label: "Seleções confirmadas", value: data?.confirmedSelections ?? 0, icon: CheckSquare },
     { label: "Vídeos publicados", value: data?.videos ?? 0, icon: Film },
-    { label: "Vídeos selecionados", value: data?.selected ?? 0, icon: CheckSquare },
-    { label: "Aguardando envio", value: data?.waitingSend ?? 0, icon: Clock },
     { label: "Materiais disponíveis", value: data?.activeMaterials ?? 0, icon: Package },
     { label: "Materiais expirados", value: data?.expiredMaterials ?? 0, icon: AlertTriangle },
     { label: "Downloads realizados", value: data?.downloads ?? 0, icon: Download },
   ];
+
+  const priorities = [
+    {
+      show: !!data?.awaitingSelections,
+      label: `${data?.awaitingSelections} seleção(ões) aguardando resposta do cliente`,
+      to: "/selecoes" as const,
+      cta: "Ver seleções",
+    },
+    {
+      show: !!data?.confirmedSelections,
+      label: `${data?.confirmedSelections} seleção(ões) confirmada(s) para preparar materiais`,
+      to: "/materiais" as const,
+      cta: "Preparar materiais",
+    },
+    {
+      show: !!data?.waitingSend,
+      label: `${data?.waitingSend} vídeo(s) em preparação aguardando envio`,
+      to: "/videos" as const,
+      cta: "Ver vídeos",
+    },
+    {
+      show: !!data?.expiringSoon.length,
+      label: `${data?.expiringSoon.length} material(is) expirando nas próximas 24h`,
+      to: "/materiais" as const,
+      cta: "Republicar",
+    },
+    {
+      show: !!data?.expiredMaterials,
+      label: `${data?.expiredMaterials} material(is) expirado(s)`,
+      to: "/materiais" as const,
+      cta: "Revisar",
+    },
+  ].filter((item) => item.show);
+
 
 
   return (
@@ -131,7 +167,33 @@ function DashboardPage() {
         ))}
       </div>
 
+      {!isLoading && !!priorities.length && (
+        <section className="surface-panel mt-5 p-6">
+          <h2 className="font-display text-lg font-semibold">Prioridades</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            O que precisa da sua atenção agora.
+          </p>
+          <ul className="mt-4 space-y-2">
+            {priorities.map((item) => (
+              <li
+                key={item.label}
+                className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2/40 p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="text-sm">{item.label}</span>
+                <Link
+                  to={item.to}
+                  className="inline-flex items-center gap-1 text-sm font-medium text-brand-violet transition-opacity hover:opacity-80"
+                >
+                  {item.cta} <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {!!data?.expiringSoon.length && (
+
         <div className="surface-panel mt-5 border-amber-500/30 p-5">
           <p className="flex items-center gap-2 font-display font-semibold text-amber-300">
             <AlertTriangle className="h-4 w-4" /> Materiais expirando nas próximas 24h
