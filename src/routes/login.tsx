@@ -10,8 +10,6 @@ import { Label } from "@/components/ui/label";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 
-const ALLOWED_EMAIL = "smart.tag14@gmail.com";
-
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
@@ -31,6 +29,14 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+async function isAdminUser(userId: string) {
+  const { data, error } = await supabase.rpc("has_role", {
+    _user_id: userId,
+    _role: "admin",
+  });
+  return !error && Boolean(data);
+}
+
 function LoginPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "reset">("login");
@@ -40,10 +46,9 @@ function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) return;
-      const sessionEmail = data.session.user.email?.toLowerCase();
-      if (sessionEmail === ALLOWED_EMAIL) {
+      if (await isAdminUser(data.session.user.id)) {
         navigate({ to: "/dashboard" });
       } else {
         supabase.auth.signOut();
@@ -54,18 +59,18 @@ function LoginPage() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     const normalized = email.trim().toLowerCase();
-    if (normalized !== ALLOWED_EMAIL) {
-      toast.error("Este e-mail não tem permissão de acesso ao painel.");
-      return;
-    }
     setLoading(true);
     try {
       if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: normalized,
           password,
         });
         if (error) throw error;
+        if (!data.user || !(await isAdminUser(data.user.id))) {
+          await supabase.auth.signOut();
+          throw new Error("Esta conta não tem permissão de acesso ao painel.");
+        }
         toast.success("Bem-vindo de volta!");
         navigate({ to: "/dashboard" });
       } else {
@@ -91,9 +96,9 @@ function LoginPage() {
       });
       if (result.error) throw result.error;
       const { data } = await supabase.auth.getUser();
-      if (data.user?.email?.toLowerCase() !== ALLOWED_EMAIL) {
+      if (!data.user || !(await isAdminUser(data.user.id))) {
         await supabase.auth.signOut();
-        throw new Error("Esta conta Google não tem permissão de acesso ao painel.");
+        throw new Error("Esta conta não tem permissão de acesso ao painel.");
       }
       navigate({ to: "/dashboard" });
     } catch (error) {
@@ -123,15 +128,17 @@ function LoginPage() {
               : "Área exclusiva da equipe SMART TAG."}
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4" autoComplete="off">
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
+                name="login-email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder={ALLOWED_EMAIL}
+                placeholder="Digite seu e-mail"
+                autoComplete="off"
                 required
               />
             </div>
@@ -140,10 +147,12 @@ function LoginPage() {
                 <Label htmlFor="password">Senha</Label>
                 <Input
                   id="password"
+                  name="login-password"
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Digite sua senha"
+                  autoComplete="new-password"
                   minLength={6}
                   required
                 />
