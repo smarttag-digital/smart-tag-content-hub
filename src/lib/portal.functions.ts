@@ -234,39 +234,111 @@ export const toggleVideoSelection = createServerFn({ method: "POST" })
 export const saveVideoNote = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
-      .object({ slug: z.string().min(1), videoId: z.string().uuid(), note: z.string().max(1000) })
+      .object({ slug: z.string().min(1), videoId: z.string().uuid(), note: z.string().min(1).max(1000) })
       .parse(input),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin, campaign, selection } = await loadContext(data.slug);
-    if (selection.status !== "aguardando") throw new Error("Seleção já confirmada");
+
+    const { data: video } = await supabaseAdmin
+      .from("videos")
+      .select("id, title, campaign_id")
+      .eq("id", data.videoId)
+      .maybeSingle();
+    if (!video || video.campaign_id !== campaign.id) throw new Error("Conteúdo inválido");
 
     const note = data.note.trim();
-    await supabaseAdmin
-      .from("selection_items")
-      .upsert(
-        { selection_id: selection.id, video_id: data.videoId, note: note || null },
-        { onConflict: "selection_id,video_id" },
-      );
-    await supabaseAdmin.from("videos").update({ status: "selecionado" }).eq("id", data.videoId);
+    if (!note) throw new Error("Escreva sua observação");
 
-    if (note) {
-      await supabaseAdmin.from("video_comments").insert({
-        video_id: data.videoId,
-        selection_id: selection.id,
-        body: note,
-      });
-      await supabaseAdmin.from("activity_logs").insert({
-        actor: "cliente",
-        action: "observacao_enviada",
-        description: `Nova observação do cliente na campanha "${campaign.name}"`,
-        client_id: campaign.client_id,
-        campaign_id: campaign.id,
-        video_id: data.videoId,
-      });
+    const { data: item } = await supabaseAdmin
+      .from("selection_items")
+      .select("id")
+      .eq("selection_id", selection.id)
+      .eq("video_id", video.id)
+      .maybeSingle();
+
+    if (item) {
+      await supabaseAdmin.from("selection_items").update({ note }).eq("id", item.id);
     }
+
+    await supabaseAdmin.from("video_comments").insert({
+      video_id: video.id,
+      selection_id: selection.id,
+      body: note,
+    });
+
+    const client = campaign.clients as unknown as { company_name: string };
+    await supabaseAdmin.from("activity_logs").insert({
+      actor: "cliente",
+      action: "observacao_enviada",
+      description: `${client.company_name} enviou uma observação em "${video.title}"`,
+      client_id: campaign.client_id,
+      campaign_id: campaign.id,
+      video_id: video.id,
+    });
     return { ok: true };
   });
+
+export const setVideoApproval = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        slug: z.string().min(1),
+        videoId: z.string().uuid(),
+        approval: z.enum(["aguardando", "aprovado", "alteracao"]),
+        changeRequest: z.string().max(1000).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin, campaign } = await loadContext(data.slug);
+
+    const { data: video } = await supabaseAdmin
+      .from("videos")
+      .select("id, title, campaign_id")
+      .eq("id", data.videoId)
+      .maybeSingle();
+    if (!video || video.campaign_id !== campaign.id) throw new Error("Conteúdo inválido");
+
+    const change = data.changeRequest?.trim() ?? "";
+    if (data.approval === "alteracao" && !change) {
+      throw new Error("Conte-nos o que precisa ser alterado.");
+    }
+
+    await supabaseAdmin
+      .from("videos")
+      .update({
+        approval_status: data.approval,
+        change_request: data.approval === "alteracao" ? change : null,
+        approval_updated_at: new Date().toISOString(),
+      })
+      .eq("id", video.id);
+
+    const client = campaign.clients as unknown as { company_name: string };
+
+    if (data.approval === "alteracao") {
+      await supabaseAdmin.from("video_comments").insert({
+        video_id: video.id,
+        body: `Alteração solicitada: ${change}`,
+      });
+    }
+
+    await supabaseAdmin.from("activity_logs").insert({
+      actor: "cliente",
+      action: data.approval === "alteracao" ? "alteracao_solicitada" : "aprovacao_conteudo",
+      description:
+        data.approval === "alteracao"
+          ? `${client.company_name} solicitou alteração em "${video.title}"`
+          : `${client.company_name} aprovou o conteúdo "${video.title}"`,
+      client_id: campaign.client_id,
+      campaign_id: campaign.id,
+      video_id: video.id,
+    });
+
+    return { ok: true };
+  });
+
+
 
 export const confirmSelection = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => slugInput.parse(input))
