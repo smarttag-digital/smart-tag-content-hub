@@ -13,6 +13,8 @@ export type PortalVideo = {
   thumbnailUrl: string | null;
   selected: boolean;
   note: string | null;
+  approval_status: string;
+  change_request: string | null;
 };
 
 export type PortalData = {
@@ -41,16 +43,17 @@ export type PortalData = {
 
 const slugInput = z.object({ slug: z.string().min(1) });
 
-async function loadContext(slug: string) {
+async function loadContext(token: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const { data: campaign } = await supabaseAdmin
     .from("campaigns")
     .select("*, clients(*)")
-    .eq("slug", slug)
+    .eq("access_token", token)
     .maybeSingle();
 
-  if (!campaign) throw new Error("Campanha não encontrada");
+  if (!campaign) throw new Error("Este link não é mais válido. Solicite um novo acesso à equipe SMART TAG.");
+  if (campaign.access_revoked) throw new Error("Este acesso foi revogado.");
   if (campaign.status === "rascunho") throw new Error("Esta campanha ainda não foi publicada");
 
   let { data: selection } = await supabaseAdmin
@@ -70,6 +73,7 @@ async function loadContext(slug: string) {
 
   return { supabaseAdmin, campaign, selection: selection! };
 }
+
 
 async function sign(
   admin: Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"],
