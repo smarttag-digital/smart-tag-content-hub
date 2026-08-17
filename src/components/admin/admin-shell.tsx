@@ -126,6 +126,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationsBell />
+
             <div className="text-right">
               <p className="text-sm font-medium leading-tight">{userLabel}</p>
               <p className="text-[11px] text-muted-foreground">Administrador</p>
