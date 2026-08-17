@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 
 import { BrandLockup } from "@/components/brand";
+import { NotificationsBell } from "@/components/admin/notifications-bell";
+
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
