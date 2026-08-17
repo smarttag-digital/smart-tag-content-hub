@@ -167,7 +167,33 @@ function DashboardPage() {
         ))}
       </div>
 
+      {!isLoading && !!priorities.length && (
+        <section className="surface-panel mt-5 p-6">
+          <h2 className="font-display text-lg font-semibold">Prioridades</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            O que precisa da sua atenção agora.
+          </p>
+          <ul className="mt-4 space-y-2">
+            {priorities.map((item) => (
+              <li
+                key={item.label}
+                className="flex flex-col gap-2 rounded-xl border border-border bg-surface-2/40 p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="text-sm">{item.label}</span>
+                <Link
+                  to={item.to}
+                  className="inline-flex items-center gap-1 text-sm font-medium text-brand-violet transition-opacity hover:opacity-80"
+                >
+                  {item.cta} <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {!!data?.expiringSoon.length && (
+
         <div className="surface-panel mt-5 border-amber-500/30 p-5">
           <p className="flex items-center gap-2 font-display font-semibold text-amber-300">
             <AlertTriangle className="h-4 w-4" /> Materiais expirando nas próximas 24h
