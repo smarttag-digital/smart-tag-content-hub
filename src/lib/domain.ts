@@ -136,3 +136,24 @@ export function formatCountdown(expiresAt?: string | null) {
   const minutes = Math.floor((hours % 1) * 60);
   return `${rest}h ${minutes}min restantes`;
 }
+
+export const APPROVAL_STATUS = [
+  { value: "aguardando", label: "Aguardando" },
+  { value: "aprovado", label: "Aprovado" },
+  { value: "alteracao", label: "Alteração solicitada" },
+] as const;
+
+export function portalUrl(token: string) {
+  if (typeof window === "undefined") return `/portal/${token}`;
+  return `${window.location.origin}/portal/${token}`;
+}
+
+export function formatTimelineDate(value?: string | null) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date
+    .toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
+    .replace(".", "")
+    .toUpperCase();
+}
