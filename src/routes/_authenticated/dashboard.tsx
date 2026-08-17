@@ -80,14 +80,16 @@ function DashboardPage() {
         return hours !== null && hours <= 24;
       });
 
+      const allSelections = selections.data ?? [];
+
       return {
         clients: clients.count ?? 0,
         campaigns: campaigns.count ?? 0,
         videos: allVideos.length,
         selected: allVideos.filter((video) => video.status === "selecionado").length,
         waitingSend: allVideos.filter((video) => video.status === "preparacao").length,
-        pendingSelections: (selections.data ?? []).filter((item) => item.status === "confirmada")
-          .length,
+        awaitingSelections: allSelections.filter((item) => item.status === "aguardando").length,
+        confirmedSelections: allSelections.filter((item) => item.status === "confirmada").length,
         activeMaterials: active.length,
         expiredMaterials: allMaterials.length - active.length,
         downloads: downloads.count ?? 0,
@@ -100,14 +102,48 @@ function DashboardPage() {
 
   const kpis = [
     { label: "Clientes ativos", value: data?.clients ?? 0, icon: Users },
-    { label: "Campanhas publicadas", value: data?.campaigns ?? 0, icon: Megaphone },
+    { label: "Campanhas ativas", value: data?.campaigns ?? 0, icon: Megaphone },
+    { label: "Seleções aguardando", value: data?.awaitingSelections ?? 0, icon: Clock },
+    { label: "Seleções confirmadas", value: data?.confirmedSelections ?? 0, icon: CheckSquare },
     { label: "Vídeos publicados", value: data?.videos ?? 0, icon: Film },
-    { label: "Vídeos selecionados", value: data?.selected ?? 0, icon: CheckSquare },
-    { label: "Aguardando envio", value: data?.waitingSend ?? 0, icon: Clock },
     { label: "Materiais disponíveis", value: data?.activeMaterials ?? 0, icon: Package },
     { label: "Materiais expirados", value: data?.expiredMaterials ?? 0, icon: AlertTriangle },
     { label: "Downloads realizados", value: data?.downloads ?? 0, icon: Download },
   ];
+
+  const priorities = [
+    {
+      show: !!data?.awaitingSelections,
+      label: `${data?.awaitingSelections} seleção(ões) aguardando resposta do cliente`,
+      to: "/selecoes" as const,
+      cta: "Ver seleções",
+    },
+    {
+      show: !!data?.confirmedSelections,
+      label: `${data?.confirmedSelections} seleção(ões) confirmada(s) para preparar materiais`,
+      to: "/materiais" as const,
+      cta: "Preparar materiais",
+    },
+    {
+      show: !!data?.waitingSend,
+      label: `${data?.waitingSend} vídeo(s) em preparação aguardando envio`,
+      to: "/videos" as const,
+      cta: "Ver vídeos",
+    },
+    {
+      show: !!data?.expiringSoon.length,
+      label: `${data?.expiringSoon.length} material(is) expirando nas próximas 24h`,
+      to: "/materiais" as const,
+      cta: "Republicar",
+    },
+    {
+      show: !!data?.expiredMaterials,
+      label: `${data?.expiredMaterials} material(is) expirado(s)`,
+      to: "/materiais" as const,
+      cta: "Revisar",
+    },
+  ].filter((item) => item.show);
+
 
 
   return (
