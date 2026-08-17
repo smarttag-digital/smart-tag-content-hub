@@ -133,11 +133,7 @@ function CampaignsPage() {
     (campaign) => filter === "todas" || campaign.status === filter,
   );
 
-  function copyLink(slug: string) {
-    const url = `${window.location.origin}/portal/${slug}`;
-    navigator.clipboard.writeText(url);
-    toast.success("Link do portal copiado!");
-  }
+
 
   return (
     <>
