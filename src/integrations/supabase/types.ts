@@ -120,6 +120,8 @@ export type Database = {
       }
       campaigns: {
         Row: {
+          access_revoked: boolean
+          access_token: string
           client_id: string
           created_at: string
           description: string | null
@@ -132,6 +134,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_revoked?: boolean
+          access_token: string
           client_id: string
           created_at?: string
           description?: string | null
@@ -144,6 +148,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_revoked?: boolean
+          access_token?: string
           client_id?: string
           created_at?: string
           description?: string | null
@@ -337,6 +343,80 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string
+          campaign_id: string | null
+          client_id: string | null
+          created_at: string
+          dedupe_key: string | null
+          id: string
+          link_to: string | null
+          material_id: string | null
+          read_at: string | null
+          title: string
+          type: string
+          video_id: string | null
+        }
+        Insert: {
+          body: string
+          campaign_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          link_to?: string | null
+          material_id?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          video_id?: string | null
+        }
+        Update: {
+          body?: string
+          campaign_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          link_to?: string | null
+          material_id?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -501,8 +581,11 @@ export type Database = {
       }
       videos: {
         Row: {
+          approval_status: string
+          approval_updated_at: string | null
           campaign_id: string
           category: string
+          change_request: string | null
           created_at: string
           description: string | null
           duration_seconds: number | null
@@ -516,8 +599,11 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          approval_status?: string
+          approval_updated_at?: string | null
           campaign_id: string
           category?: string
+          change_request?: string | null
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
@@ -531,8 +617,11 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          approval_status?: string
+          approval_updated_at?: string | null
           campaign_id?: string
           category?: string
+          change_request?: string | null
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
@@ -568,6 +657,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      sync_material_notifications: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "staff"
