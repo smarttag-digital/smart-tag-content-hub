@@ -121,6 +121,9 @@ export const getPortal = createServerFn({ method: "GET" })
         thumbnailUrl: await sign(supabaseAdmin, "thumbnails", video.thumbnail_url),
         selected: selectedMap.has(video.id),
         note: selectedMap.get(video.id) ?? null,
+        approval_status: video.approval_status,
+        change_request: video.change_request,
+
       })),
     );
 
