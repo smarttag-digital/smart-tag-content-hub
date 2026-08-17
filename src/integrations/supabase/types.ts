@@ -135,7 +135,7 @@ export type Database = {
         }
         Insert: {
           access_revoked?: boolean
-          access_token: string
+          access_token?: string
           client_id: string
           created_at?: string
           description?: string | null
@@ -657,7 +657,6 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
-      sync_material_notifications: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "staff"
