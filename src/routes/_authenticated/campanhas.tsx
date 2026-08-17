@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Megaphone, Copy, ExternalLink, Trash2 } from "lucide-react";
+import { Plus, Megaphone, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { AccessLinkActions } from "@/components/admin/access-link";
 import { EmptyState, LoadingGrid, PageHeader, StatusBadge } from "@/components/admin/ui-bits";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
