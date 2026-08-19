@@ -188,26 +188,16 @@ function CampaignDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              if (!campaign) return;
-              navigator.clipboard.writeText(`${window.location.origin}/portal/${campaign.slug}`);
-              toast.success("Link do portal copiado!");
-            }}
-          >
-            <Copy className="mr-2 h-3.5 w-3.5" /> Copiar link
-          </Button>
           {campaign && (
-            <a
-              href={`/portal/${campaign.slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ExternalLink className="mr-2 h-3.5 w-3.5" /> Abrir portal
-            </a>
+            <AccessLinkActions
+              campaign={{
+                id: campaign.id,
+                name: campaign.name,
+                access_token: campaign.access_token,
+                access_revoked: campaign.access_revoked,
+              }}
+              invalidateKeys={[["campaign", id], ["campaigns"]]}
+            />
           )}
           <Button
             size="sm"
@@ -218,6 +208,14 @@ function CampaignDetailPage() {
           </Button>
         </div>
       </div>
+
+      <section className="surface-panel mb-6 p-6">
+        <h2 className="font-display text-lg font-semibold">Linha do tempo da campanha</h2>
+        <p className="mb-4 mt-1 text-sm text-muted-foreground">
+          Marcos e interações do cliente registrados automaticamente.
+        </p>
+        <ActivityTimeline campaignId={id} emptyLabel="Ainda não há movimentações nesta campanha." />
+      </section>
 
       <section className="surface-panel mb-6 p-6">
         <h2 className="font-display text-lg font-semibold">Enviar vídeos</h2>
