@@ -68,9 +68,12 @@ function PortalPage() {
   const load = useServerFn(getPortal);
   const toggle = useServerFn(toggleVideoSelection);
   const note = useServerFn(saveVideoNote);
+  const approve = useServerFn(setVideoApproval);
   const confirm = useServerFn(confirmSelection);
   const [filter, setFilter] = useState("todas");
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [changeDrafts, setChangeDrafts] = useState<Record<string, string>>({});
+  const [changeOpen, setChangeOpen] = useState<Record<string, boolean>>({});
   const [playing, setPlaying] = useState<{ id: string; title: string; url: string } | null>(null);
 
   const { data, isLoading, error } = useQuery({
