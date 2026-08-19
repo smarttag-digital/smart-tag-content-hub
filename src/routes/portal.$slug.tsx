@@ -180,10 +180,24 @@ function PortalPage() {
     <main className="min-h-screen bg-background pb-32">
       <header className="aurora border-b border-border px-4 py-12 lg:px-10">
         <div className="mx-auto max-w-6xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-violet">
-            {data.agency.agency_name}
-          </p>
-          <h1 className="mt-3 font-display text-3xl font-bold lg:text-4xl">{data.campaign.name}</h1>
+          <div className="flex flex-wrap items-center gap-4">
+            {data.client.logoUrl ? (
+              <img
+                src={data.client.logoUrl}
+                alt={`Logo de ${data.client.company_name}`}
+                className="h-14 w-14 rounded-xl border border-border bg-surface-2 object-contain p-1.5"
+              />
+            ) : null}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-violet">
+                {data.agency.agency_name}
+              </p>
+              <p className="mt-1 font-display text-lg font-semibold">
+                Olá, {data.client.contact_name || data.client.company_name}
+              </p>
+            </div>
+          </div>
+          <h1 className="mt-4 font-display text-3xl font-bold lg:text-4xl">{data.campaign.name}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {data.client.company_name} · {formatPeriod(data.campaign.start_date, data.campaign.end_date)}
           </p>
@@ -192,6 +206,7 @@ function PortalPage() {
           </p>
         </div>
       </header>
+
 
       <div className="mx-auto max-w-6xl px-4 py-8 lg:px-10">
         {data.locked && (
