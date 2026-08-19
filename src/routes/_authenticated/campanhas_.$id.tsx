@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ArrowLeft, Copy, ExternalLink, Loader2, Trash2, Upload, Film } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2, Upload, Film } from "lucide-react";
 import { toast } from "sonner";
 
+import { AccessLinkActions } from "@/components/admin/access-link";
+import { ActivityTimeline } from "@/components/admin/activity-timeline";
 import { EmptyState, LoadingGrid, StatusBadge } from "@/components/admin/ui-bits";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
