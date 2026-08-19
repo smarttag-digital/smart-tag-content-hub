@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  APPROVAL_STATUS,
   CATEGORIES,
   MATERIAL_TYPES,
   formatBytes,
@@ -36,6 +37,7 @@ import {
   getPortal,
   getPortalMaterials,
   saveVideoNote,
+  setVideoApproval,
   toggleVideoSelection,
 } from "@/lib/portal.functions";
 
