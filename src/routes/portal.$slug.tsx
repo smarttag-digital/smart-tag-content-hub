@@ -100,6 +100,27 @@ function PortalPage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const approvalMutation = useMutation({
+    mutationFn: (input: {
+      videoId: string;
+      approval: "aguardando" | "aprovado" | "alteracao";
+      changeRequest?: string;
+    }) => approve({ data: { slug, ...input } }),
+    onSuccess: (_result, variables) => {
+      toast.success(
+        variables.approval === "aprovado"
+          ? "Conteúdo aprovado! Nossa equipe foi avisada."
+          : variables.approval === "alteracao"
+            ? "Pedido de alteração enviado."
+            : "Aprovação reaberta.",
+      );
+      setChangeOpen((state) => ({ ...state, [variables.videoId]: false }));
+      invalidate();
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+
   const confirmMutation = useMutation({
     mutationFn: () => confirm({ data: { slug } }),
     onSuccess: () => {
