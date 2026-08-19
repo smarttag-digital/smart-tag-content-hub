@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  APPROVAL_STATUS,
   CATEGORIES,
   MATERIAL_TYPES,
   formatBytes,
@@ -36,6 +37,7 @@ import {
   getPortal,
   getPortalMaterials,
   saveVideoNote,
+  setVideoApproval,
   toggleVideoSelection,
 } from "@/lib/portal.functions";
 
@@ -66,9 +68,12 @@ function PortalPage() {
   const load = useServerFn(getPortal);
   const toggle = useServerFn(toggleVideoSelection);
   const note = useServerFn(saveVideoNote);
+  const approve = useServerFn(setVideoApproval);
   const confirm = useServerFn(confirmSelection);
   const [filter, setFilter] = useState("todas");
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [changeDrafts, setChangeDrafts] = useState<Record<string, string>>({});
+  const [changeOpen, setChangeOpen] = useState<Record<string, boolean>>({});
   const [playing, setPlaying] = useState<{ id: string; title: string; url: string } | null>(null);
 
   const { data, isLoading, error } = useQuery({
@@ -94,6 +99,27 @@ function PortalPage() {
     },
     onError: (err: Error) => toast.error(err.message),
   });
+
+  const approvalMutation = useMutation({
+    mutationFn: (input: {
+      videoId: string;
+      approval: "aguardando" | "aprovado" | "alteracao";
+      changeRequest?: string;
+    }) => approve({ data: { slug, ...input } }),
+    onSuccess: (_result, variables) => {
+      toast.success(
+        variables.approval === "aprovado"
+          ? "Conteúdo aprovado! Nossa equipe foi avisada."
+          : variables.approval === "alteracao"
+            ? "Pedido de alteração enviado."
+            : "Aprovação reaberta.",
+      );
+      setChangeOpen((state) => ({ ...state, [variables.videoId]: false }));
+      invalidate();
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
 
   const confirmMutation = useMutation({
     mutationFn: () => confirm({ data: { slug } }),
@@ -154,10 +180,24 @@ function PortalPage() {
     <main className="min-h-screen bg-background pb-32">
       <header className="aurora border-b border-border px-4 py-12 lg:px-10">
         <div className="mx-auto max-w-6xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-violet">
-            {data.agency.agency_name}
-          </p>
-          <h1 className="mt-3 font-display text-3xl font-bold lg:text-4xl">{data.campaign.name}</h1>
+          <div className="flex flex-wrap items-center gap-4">
+            {data.client.logoUrl ? (
+              <img
+                src={data.client.logoUrl}
+                alt={`Logo de ${data.client.company_name}`}
+                className="h-14 w-14 rounded-xl border border-border bg-surface-2 object-contain p-1.5"
+              />
+            ) : null}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-violet">
+                {data.agency.agency_name}
+              </p>
+              <p className="mt-1 font-display text-lg font-semibold">
+                Olá, {data.client.contact_name || data.client.company_name}
+              </p>
+            </div>
+          </div>
+          <h1 className="mt-4 font-display text-3xl font-bold lg:text-4xl">{data.campaign.name}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {data.client.company_name} · {formatPeriod(data.campaign.start_date, data.campaign.end_date)}
           </p>
@@ -166,6 +206,7 @@ function PortalPage() {
           </p>
         </div>
       </header>
+
 
       <div className="mx-auto max-w-6xl px-4 py-8 lg:px-10">
         {data.locked && (
@@ -247,6 +288,25 @@ function PortalPage() {
                     <p className="text-sm text-muted-foreground">{video.description}</p>
                   )}
 
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={
+                        video.approval_status === "aprovado"
+                          ? "inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-500/12 px-2.5 py-0.5 text-xs font-medium text-emerald-300"
+                          : video.approval_status === "alteracao"
+                            ? "inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/12 px-2.5 py-0.5 text-xs font-medium text-amber-300"
+                            : "inline-flex items-center rounded-full border border-border bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                      }
+                    >
+                      {labelOf(APPROVAL_STATUS, video.approval_status)}
+                    </span>
+                    {video.change_request && (
+                      <span className="text-xs text-muted-foreground">
+                        “{video.change_request}”
+                      </span>
+                    )}
+                  </div>
+
                   {!data.locked && (
                     <>
                       <Button
@@ -258,30 +318,86 @@ function PortalPage() {
                       >
                         {video.selected ? "Remover seleção" : "Selecionar vídeo"}
                       </Button>
-                      {video.selected && (
-                        <div className="space-y-2">
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          size="sm"
+                          variant={video.approval_status === "aprovado" ? "secondary" : "outline"}
+                          disabled={approvalMutation.isPending}
+                          onClick={() =>
+                            approvalMutation.mutate({
+                              videoId: video.id,
+                              approval: video.approval_status === "aprovado" ? "aguardando" : "aprovado",
+                            })
+                          }
+                        >
+                          <Check className="mr-1.5 h-3.5 w-3.5" />
+                          {video.approval_status === "aprovado" ? "Aprovado" : "Aprovar"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            setChangeOpen((state) => ({
+                              ...state,
+                              [video.id]: !state[video.id],
+                            }))
+                          }
+                        >
+                          Solicitar alteração
+                        </Button>
+                      </div>
+
+                      {changeOpen[video.id] && (
+                        <div className="space-y-2 rounded-lg border border-border p-3">
                           <Textarea
-                            rows={2}
-                            placeholder="Alguma observação sobre este vídeo?"
-                            value={notes[video.id] ?? video.note ?? ""}
+                            rows={3}
+                            placeholder="O que precisa ser alterado neste conteúdo?"
+                            value={changeDrafts[video.id] ?? video.change_request ?? ""}
                             onChange={(event) =>
-                              setNotes({ ...notes, [video.id]: event.target.value })
+                              setChangeDrafts({ ...changeDrafts, [video.id]: event.target.value })
                             }
                           />
                           <Button
                             size="sm"
-                            variant="ghost"
+                            className="gradient-brand w-full"
+                            disabled={approvalMutation.isPending}
                             onClick={() =>
-                              noteMutation.mutate({
+                              approvalMutation.mutate({
                                 videoId: video.id,
-                                note: notes[video.id] ?? video.note ?? "",
+                                approval: "alteracao",
+                                changeRequest: changeDrafts[video.id] ?? video.change_request ?? "",
                               })
                             }
                           >
-                            Enviar observação
+                            Enviar pedido de alteração
                           </Button>
                         </div>
                       )}
+
+                      <div className="space-y-2">
+                        <Textarea
+                          rows={2}
+                          placeholder="Alguma observação sobre este vídeo?"
+                          value={notes[video.id] ?? video.note ?? ""}
+                          onChange={(event) =>
+                            setNotes({ ...notes, [video.id]: event.target.value })
+                          }
+                        />
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={noteMutation.isPending}
+                          onClick={() =>
+                            noteMutation.mutate({
+                              videoId: video.id,
+                              note: notes[video.id] ?? video.note ?? "",
+                            })
+                          }
+                        >
+                          Enviar observação
+                        </Button>
+                      </div>
                     </>
                   )}
                   {data.locked && video.selected && (

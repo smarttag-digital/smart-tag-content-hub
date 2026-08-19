@@ -181,6 +181,14 @@ function ClientsPage() {
                   <Button
                     size="icon"
                     variant="ghost"
+                    aria-label="Ver histórico do cliente"
+                    onClick={() => setHistory({ id: client.id, name: client.company_name })}
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
                     aria-label="Editar cliente"
                     onClick={() => {
                       setForm({
