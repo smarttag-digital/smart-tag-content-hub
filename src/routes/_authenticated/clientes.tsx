@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Users, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Search, History } from "lucide-react";
 import { toast } from "sonner";
 
+import { ActivityTimeline } from "@/components/admin/activity-timeline";
 import { EmptyState, LoadingGrid, PageHeader, StatusBadge } from "@/components/admin/ui-bits";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,6 +64,7 @@ function ClientsPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<ClientForm>(EMPTY);
   const [search, setSearch] = useState("");
+  const [history, setHistory] = useState<{ id: string; name: string } | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["clients"],
@@ -321,6 +323,24 @@ function ClientsPage() {
               Salvar
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!history} onOpenChange={(value) => !value && setHistory(null)}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Histórico de {history?.name}</DialogTitle>
+            <DialogDescription>
+              Linha do tempo com acessos, seleções, aprovações e downloads do cliente.
+            </DialogDescription>
+          </DialogHeader>
+          {history && (
+            <ActivityTimeline
+              clientId={history.id}
+              limit={50}
+              emptyLabel="Nenhuma interação registrada para este cliente."
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>
